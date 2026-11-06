@@ -14,11 +14,10 @@ let package = Package(
     targets: [
         // Networking, models, session logic. Pure Foundation: builds and tests on Linux CI too.
         .target(name: "PulseCore"),
-        // Obsidian Mint design system: tokens, glass surfaces, motion, reusable components.
+        // Graphite Glass design system: tokens, glass surfaces, motion, reusable components.
         .target(
             name: "PulseDesign",
             dependencies: ["PulseCore"],
-            resources: [.copy("Resources/Fonts")],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
         // Screens and view models.

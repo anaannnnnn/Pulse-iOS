@@ -12,7 +12,7 @@ public enum Route: Hashable {
 }
 
 public enum SettingsPage: String, Hashable, CaseIterable {
-    case libraries, playback, privacy, pcloud, torbox, matching, sources, data, about
+    case libraries, appearance, playback, privacy, pcloud, torbox, matching, sources, data, about
 }
 
 /// Presents the full-screen player from anywhere in the app.
@@ -22,6 +22,7 @@ public final class PlayerCoordinator {
     public var scene: Video?
     public var tonightOpen = false
     public var showLibraries = false
+    public var settingsOpen = false
     public var tab: AppTab = .home
 
     public init() {}
@@ -30,13 +31,13 @@ public final class PlayerCoordinator {
 
     /// Jump to Settings → Libraries (used by empty-state buttons).
     public func openLibraries() {
-        tab = .settings
         showLibraries = true
+        settingsOpen = true
     }
 }
 
 public enum AppTab: String, Hashable, CaseIterable, Sendable {
-    case home, library, search, people, saved, settings
+    case home, library, search, people, saved
 
     public var title: LocalizedStringKey {
         switch self {
@@ -45,7 +46,6 @@ public enum AppTab: String, Hashable, CaseIterable, Sendable {
         case .search: "Search"
         case .people: "People"
         case .saved: "Saved"
-        case .settings: "Settings"
         }
     }
 
@@ -56,7 +56,6 @@ public enum AppTab: String, Hashable, CaseIterable, Sendable {
         case .search: "magnifyingglass"
         case .people: "person.2.fill"
         case .saved: "heart.fill"
-        case .settings: "gearshape.fill"
         }
     }
 }

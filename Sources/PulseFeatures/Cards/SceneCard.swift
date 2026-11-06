@@ -48,9 +48,8 @@ struct SceneCard: View {
             }
             .overlay {
                 if showsPlay {
-                    Image(systemName: "play.fill").font(.system(size: 18, weight: .bold)).foregroundStyle(Theme.onAccent)
-                        .frame(width: 52, height: 52).background(Theme.gradient, in: Circle())
-                        .shadow(color: Theme.accent.opacity(0.55), radius: 16)
+                    Image(systemName: "play.fill").font(.system(size: 17, weight: .semibold)).foregroundStyle(.white)
+                        .frame(width: 52, height: 52).pulseGlass(in: Circle(), tint: Theme.accent.opacity(0.3))
                 }
             }
             .overlay(alignment: .topLeading) {
@@ -84,7 +83,7 @@ struct SceneCard: View {
                     GeometryReader { proxy in
                         Capsule().fill(Theme.gradient)
                             .frame(width: proxy.size.width * progress.fraction, height: 4)
-                            .shadow(color: Theme.accent.opacity(0.7), radius: 4)
+
                             .frame(maxHeight: .infinity, alignment: .bottom)
                     }
                     .allowsHitTesting(false)
@@ -168,6 +167,7 @@ struct SceneRow: View {
         }
         .buttonStyle(.pressable)
         .zoomSource(id: scene.id, in: zoomNamespace)
+        .swipeToSave(scene)
     }
 }
 #endif

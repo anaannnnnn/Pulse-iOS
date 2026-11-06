@@ -7,7 +7,8 @@ import PulseDesign
 /// cast avatars and a serif title on a warm fade.
 struct FeatureCard: View {
     let scene: Video
-    static let size = CGSize(width: 278, height: 392)
+    var width: CGFloat = 280
+    var height: CGFloat { (width * 1.38).rounded() }
 
     @Environment(FavoritesHub.self) private var hub
     @Environment(PlayerCoordinator.self) private var player
@@ -29,10 +30,10 @@ struct FeatureCard: View {
                     .buttonStyle(.pulseIcon)
                     .accessibilityLabel("Play")
             }
-            .padding(14)
+            .padding(12)
             .frame(maxHeight: .infinity, alignment: .top)
         }
-        .frame(width: Self.size.width, height: Self.size.height)
+        .frame(width: width, height: height)
         .contextMenu {
             Button("Play", systemImage: "play.fill") { player.play(scene) }
         }
@@ -42,14 +43,14 @@ struct FeatureCard: View {
         Color.clear
             .overlay { PulseArt(scene.poster ?? scene.thumb, seed: scene.id) }
             .overlay {
-                LinearGradient(stops: [.init(color: .clear, location: 0.35), .init(color: Color(hex: 0x1A0F08).opacity(0.78), location: 0.78),
-                                       .init(color: Color(hex: 0x120A05).opacity(0.96), location: 1)], startPoint: .top, endPoint: .bottom)
+                LinearGradient(stops: [.init(color: .clear, location: 0.4), .init(color: .black.opacity(0.7), location: 0.78),
+                                       .init(color: .black.opacity(0.92), location: 1)], startPoint: .top, endPoint: .bottom)
             }
             .overlay(alignment: .bottom) {
                 VStack(spacing: 10) {
                     if !scene.performers.isEmpty { cast }
                     Text(scene.title)
-                        .font(PulseFont.serif(27, relativeTo: .title2))
+                        .font(PulseFont.serif(26, relativeTo: .title2))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
                         .lineLimit(2)
@@ -68,7 +69,7 @@ struct FeatureCard: View {
             }
             .clipShape(.rect(cornerRadius: 30, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).strokeBorder(Theme.rim, lineWidth: 1))
-            .shadow(color: .black.opacity(0.55), radius: 26, y: 16)
+            .shadow(color: .black.opacity(0.5), radius: 24, y: 14)
     }
 
     private var cast: some View {

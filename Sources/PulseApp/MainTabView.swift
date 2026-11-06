@@ -4,58 +4,52 @@ import PulseCore
 import PulseDesign
 import PulseFeatures
 
-/// Tabs live in one ZStack so each keeps its scroll position and navigation stack. The bar floats above them.
+/// System tab bar: Liquid Glass on iOS 26 (it shrinks as you scroll), a standard bar before that.
 struct MainTabView: View {
-    @Environment(StoreBundle.self) private var stores
     @Environment(PlayerCoordinator.self) private var coordinator
-    @State private var visited: Set<AppTab> = [.home]
-
-    private let items: [FloatingTabItem<AppTab>] = [
-        .init(.home, title: "Home", icon: "house"),
-        .init(.library, title: "Library", icon: "play.rectangle.on.rectangle"),
-        .init(.search, title: "Search", icon: "magnifyingglass"),
-        .init(.people, title: "People", icon: "person.2"),
-        .init(.saved, title: "Saved", icon: "heart"),
-    ]
 
     var body: some View {
         @Bindable var coordinator = self.coordinator
-        ZStack {
-            ForEach(AppTab.allCases, id: \.self) { tab in
-                if visited.contains(tab) {
-                    let active = tab == coordinator.tab
-                    page(tab)
-                        .opacity(active ? 1 : 0)
-                        .scaleEffect(active ? 1 : 0.97)
-                        .blur(radius: active ? 0 : 6)
-                        .allowsHitTesting(active)
-                        .accessibilityHidden(!active)
-                        .zIndex(active ? 1 : 0)
-                }
-            }
+        TabView(selection: $coordinator.tab) {
+            Tab(AppTab.home.title, systemImage: "house.fill", value: AppTab.home) { TabStack { HomeView() } }
+            Tab(AppTab.library.title, systemImage: "play.square.stack.fill", value: AppTab.library) { TabStack { LibraryView() } }
+            Tab(AppTab.people.title, systemImage: "person.2.fill", value: AppTab.people) { TabStack { PeopleView() } }
+            Tab(AppTab.saved.title, systemImage: "heart.fill", value: AppTab.saved) { TabStack { SavedView() } }
+            Tab(value: AppTab.search, role: .search) { TabStack { SearchView() } }
         }
-        .animation(.smooth(duration: 0.3), value: coordinator.tab)
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            FloatingTabBar(items: items, selection: $coordinator.tab)
-        }
-        .ignoresSafeArea(.keyboard)
-        .onChange(of: coordinator.tab, initial: true) { _, tab in visited.insert(tab) }
+        .tabBarMinimizeOnScroll()
+        .sensoryFeedback(.selection, trigger: coordinator.tab)
         .fullScreenCover(item: $coordinator.scene) { video in
             PlayerContainer(video: video)
         }
+        .sheet(isPresented: $coordinator.settingsOpen) { SettingsContainer() }
         .sheet(isPresented: $coordinator.tonightOpen) { TonightContainer() }
     }
+}
 
+private extension View {
     @ViewBuilder
-    private func page(_ tab: AppTab) -> some View {
-        switch tab {
-        case .home: TabStack { HomeView() }
-        case .library: TabStack { LibraryView() }
-        case .search: TabStack { SearchView() }
-        case .people: TabStack { PeopleView() }
-        case .saved: TabStack { SavedView() }
-        case .settings: TabStack { SettingsView() }
+    func tabBarMinimizeOnScroll() -> some View {
+        #if compiler(>=6.2)
+        if #available(iOS 26, *) { tabBarMinimizeBehavior(.onScrollDown) } else { self }
+        #else
+        self
+        #endif
+    }
+}
+
+/// Settings opens as a sheet from the gear on Home.
+struct SettingsContainer: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        TabStack {
+            SettingsView()
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) { Button("Done") { dismiss() } }
+                }
         }
+        .presentationDragIndicator(.visible)
     }
 }
 #endif

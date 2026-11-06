@@ -27,6 +27,7 @@ public struct SettingsView: View {
                 row(.sources, "Metadata sources", "checkmark.seal.fill")
             }
             Section("Experience") {
+                row(.appearance, "Appearance", "paintpalette.fill")
                 row(.playback, "Playback", "play.circle.fill")
                 row(.privacy, "Privacy & security", "lock.shield.fill")
             }
@@ -65,16 +66,13 @@ public struct SettingsView: View {
 
     private var connectionCard: some View {
         HStack(spacing: 14) {
-            PulseMark(size: 30, showsWordmark: false)
-                .frame(width: 56, height: 56)
-                .pulseGlass(in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            PulseMark(size: 24, showsWordmark: false)
             VStack(alignment: .leading, spacing: 3) {
                 Text(session.isDemo ? "Demo library" : (session.email.isEmpty ? "Signed in" : session.email)).font(PulseFont.title(.headline)).foregroundStyle(Theme.text).lineLimit(1)
                 Text(session.isDemo ? "Sample data, no account needed" : (session.serverURL.host() ?? "Pulse")).font(.footnote).foregroundStyle(Theme.success)
             }
             Spacer()
-            Circle().fill(Theme.success).frame(width: 10, height: 10)
-                .shadow(color: Theme.success, radius: 5)
+            Circle().fill(Theme.success).frame(width: 8, height: 8)
                 .accessibilityHidden(true)
         }
         .padding(16)
@@ -89,6 +87,7 @@ struct SettingsPageView: View {
     var body: some View {
         switch page {
         case .libraries: LibrariesView()
+        case .appearance: AppearanceView()
         case .playback: PlaybackSettingsView()
         case .privacy: PrivacySettingsView()
         case .pcloud: PcloudSettingsView()

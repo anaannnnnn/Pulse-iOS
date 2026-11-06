@@ -7,8 +7,13 @@ public struct HomeView: View {
     @Environment(StoreBundle.self) private var stores
     @Environment(PlayerCoordinator.self) private var player
     @State private var heroIndex = 0
+    @State private var size = CGSize(width: 390, height: 844)
 
     public init() {}
+
+    /// Card width scales with the screen so layouts hold from iPhone SE to Pro Max.
+    private var cardWidth: CGFloat { min(max(size.width * 0.62, 220), 340).rounded() }
+    private var heroHeight: CGFloat { min(max(size.height * 0.56, 420), 600).rounded() }
 
     private var heroVideo: Video? {
         guard case .loaded(let feed) = stores.home.state, feed.hero.indices.contains(heroIndex) else { return nil }
@@ -17,13 +22,14 @@ public struct HomeView: View {
 
     public var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 32) {
+            LazyVStack(alignment: .leading, spacing: Theme.Space.section) {
                 content
             }
             .padding(.bottom, 28)
         }
         .scrollIndicators(.hidden)
         .ignoresSafeArea(edges: .top)
+        .onGeometryChange(for: CGSize.self, of: \.size) { size = $0 }
         .background { backdrop }
         .overlay(alignment: .top) { header }
         .toolbar(.hidden, for: .navigationBar)
@@ -45,7 +51,7 @@ public struct HomeView: View {
             Button { player.tonightOpen = true } label: { Image(systemName: "sparkles").symbolEffect(.variableColor.iterative, options: .repeat(2)) }
                 .buttonStyle(.pulseIcon)
                 .accessibilityLabel("Tonight picks")
-            Button { player.tab = .settings } label: { Image(systemName: "gearshape") }
+            Button { player.settingsOpen = true } label: { Image(systemName: "gearshape") }
                 .buttonStyle(.pulseIcon)
                 .accessibilityLabel("Settings")
         }
@@ -71,12 +77,12 @@ public struct HomeView: View {
                                systemImage: "externaldrive.badge.plus", actionTitle: "Add a library") { player.openLibraries() }
                     .padding(.top, 120)
             } else {
-                if !feed.hero.isEmpty { HeroCarousel(videos: feed.hero, index: $heroIndex) }
-                stats
+                if !feed.hero.isEmpty { HeroCarousel(videos: feed.hero, height: heroHeight, index: $heroIndex) }
+                metrics
                 let rails = feed.rails.filter { !$0.items.isEmpty }
                 let featuredID = rails.first { $0.kind == .scenes && $0.id != "continue" }?.id
                 ForEach(rails) { rail in
-                    RailView(rail: rail, style: style(for: rail, featuredID: featuredID))
+                    RailView(rail: rail, style: style(for: rail, featuredID: featuredID), cardWidth: cardWidth, screenWidth: size.width)
                 }
             }
         }
@@ -89,36 +95,31 @@ public struct HomeView: View {
     }
 
     @ViewBuilder
-    private var stats: some View {
+    private var metrics: some View {
         if let facets = stores.library.facets {
-            HStack(spacing: 10) {
-                StatTile(value: facets.totals.scenes, label: "Videos", icon: "play.rectangle.fill")
-                StatTile(value: facets.totals.matched, label: "Matched", icon: "checkmark.seal.fill")
-                StatTile(value: facets.totals.favorites, label: "Favourites", icon: "heart.fill")
+            HStack(spacing: 0) {
+                metric(facets.totals.scenes, "Videos")
+                Divider().frame(height: 32).overlay(Theme.lineStrong)
+                metric(facets.totals.matched, "Matched")
+                Divider().frame(height: 32).overlay(Theme.lineStrong)
+                metric(facets.totals.favorites, "Favourites")
             }
+            .padding(.vertical, 16)
+            .pulseGlass(in: RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
             .padding(.horizontal, Theme.Space.page)
         } else {
             Color.clear.frame(height: 0).task { await stores.library.loadFacets() }
         }
     }
-}
 
-struct StatTile: View {
-    let value: Int
-    let label: LocalizedStringKey
-    let icon: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Image(systemName: icon).font(.system(size: 13, weight: .bold)).foregroundStyle(Theme.accent)
-            CountUpText(value)
-                .font(PulseFont.display(26, relativeTo: .title2, weight: .heavy))
+    private func metric(_ value: Int, _ label: LocalizedStringKey) -> some View {
+        VStack(spacing: 4) {
+            CountUpText(value, compact: true)
+                .font(.system(size: 22, weight: .semibold).monospacedDigit())
                 .foregroundStyle(Theme.text)
-            Text(label).font(.caption.weight(.medium)).foregroundStyle(Theme.textSecondary)
+            Text(label).font(.caption).foregroundStyle(Theme.textSecondary)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .pulseGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
     }
 }
@@ -128,6 +129,8 @@ struct RailView: View {
 
     let rail: HomeRail
     var style: Style = .poster
+    var cardWidth: CGFloat = 250
+    var screenWidth: CGFloat = 390
     @Environment(StoreBundle.self) private var stores
     @Environment(PlayerCoordinator.self) private var router
 
@@ -140,12 +143,14 @@ struct RailView: View {
             case (.scenes, .featured):
                 curved
             case (.scenes, .continueWatching):
-                strip { ForEach(rail.scenes) { SceneCard(scene: $0, width: 280, showsPlay: true).pulseScrollReveal() } }
+                strip { ForEach(rail.scenes) { SceneCard(scene: $0, width: cardWidth * 1.1, showsPlay: true).pulseScrollReveal() } }
             case (.scenes, .poster):
-                strip { ForEach(rail.scenes) { SceneCard(scene: $0, width: 250).pulseScrollReveal() } }
+                strip { ForEach(rail.scenes) { SceneCard(scene: $0, width: cardWidth).pulseScrollReveal() } }
             }
         }
     }
+
+    private var featureWidth: CGFloat { (cardWidth * 1.1).rounded() }
 
     private func strip<C: View>(@ViewBuilder _ content: () -> C) -> some View {
         ScrollView(.horizontal) {
@@ -160,19 +165,19 @@ struct RailView: View {
     /// Big portrait cards that swing on a Y axis as they pass the centre.
     private var curved: some View {
         ScrollView(.horizontal) {
-            LazyHStack(spacing: 6) {
+            LazyHStack(spacing: 4) {
                 ForEach(rail.scenes) { scene in
-                    FeatureCard(scene: scene).pulseCurvedCarousel()
+                    FeatureCard(scene: scene, width: featureWidth).pulseCurvedCarousel()
                 }
             }
             .scrollTargetLayout()
             .padding(.vertical, 18)
         }
-        .contentMargins(.horizontal, (UIScreen.main.bounds.width - FeatureCard.size.width) / 2, for: .scrollContent)
+        .contentMargins(.horizontal, (screenWidth - featureWidth) / 2, for: .scrollContent)
         .scrollClipDisabled()
         .scrollIndicators(.hidden)
         .scrollTargetBehavior(.viewAligned)
-        .frame(height: FeatureCard.size.height + 36)
+        .frame(height: (featureWidth * 1.38).rounded() + 32)
     }
 
     private var seeAllAction: (() -> Void)? {
@@ -200,7 +205,7 @@ struct RailView: View {
 struct HomeSkeleton: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 28) {
-            Rectangle().fill(Theme.surface).frame(height: HeroCarousel.height).overlay { Shimmer() }
+            Rectangle().fill(Theme.surface).frame(height: 480).overlay { Shimmer() }
             ForEach(0..<2, id: \.self) { _ in
                 HStack(spacing: 14) {
                     ForEach(0..<3, id: \.self) { _ in

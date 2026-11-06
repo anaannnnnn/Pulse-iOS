@@ -64,11 +64,9 @@ public struct Chip: View {
             Text(text).font(.caption.weight(.semibold))
         }
         .foregroundStyle(tint ?? Theme.text)
-        .padding(.horizontal, 11)
+        .padding(.horizontal, 12)
         .frame(minHeight: 28)
-        .background(.black.opacity(0.35), in: Capsule())
-        .background(.ultraThinMaterial, in: Capsule())
-        .overlay(Capsule().strokeBorder(Theme.rim, lineWidth: 0.8))
+        .pulseCapsuleGlass()
     }
 }
 
@@ -113,12 +111,12 @@ public struct PulseSegmented<Value: Hashable>: View {
                         if let icon = option.icon { Image(systemName: icon).font(.caption.weight(.bold)) }
                         Text(option.title).font(.subheadline.weight(.semibold))
                     }
-                    .foregroundStyle(selected ? Color(hex: 0x0A0C0D) : Theme.textSecondary)
+                    .foregroundStyle(selected ? Theme.text : Theme.textSecondary)
                     .frame(maxWidth: .infinity, minHeight: 40)
                     .background {
                         if selected {
-                            Capsule().fill(LinearGradient(colors: [.white, Color(hex: 0xDDE3E1)], startPoint: .top, endPoint: .bottom))
-                                .shadow(color: .white.opacity(0.18), radius: 10, y: 3)
+                            Capsule().fill(.white.opacity(0.16))
+                                .overlay(Capsule().strokeBorder(.white.opacity(0.22), lineWidth: 0.8))
                                 .matchedGeometryEffect(id: "pill", in: pill)
                         }
                     }
@@ -193,7 +191,7 @@ public struct EmptyStateView: View {
                 .font(.system(size: 40, weight: .light))
                 .foregroundStyle(Theme.accentSoft)
                 .padding(22)
-                .pulseGlass(in: Circle())
+                .pulseGlass(in: Circle(), tint: Theme.accent.opacity(0.15))
                 .symbolEffect(.pulse)
             Text(title).font(PulseFont.title(.title3)).foregroundStyle(Theme.text)
             Text(message).font(.subheadline).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
@@ -220,37 +218,6 @@ public struct ErrorStateView: View {
     public var body: some View {
         EmptyStateView("Something went wrong", message: LocalizedStringKey(message), systemImage: "wifi.exclamationmark",
                        actionTitle: "Try again", action: retry)
-    }
-}
-
-/// Pulse wordmark with a heartbeat tile.
-public struct PulseMark: View {
-    var size: CGFloat
-    var showsWordmark: Bool
-
-    public init(size: CGFloat = 28, showsWordmark: Bool = true) {
-        self.size = size
-        self.showsWordmark = showsWordmark
-    }
-
-    public var body: some View {
-        HStack(spacing: size * 0.3) {
-            Image(systemName: "waveform.path.ecg")
-                .font(.system(size: size * 0.9, weight: .bold))
-                .foregroundStyle(Theme.onAccent)
-                .frame(width: size * 1.45, height: size * 1.45)
-                .background(Theme.gradient, in: RoundedRectangle(cornerRadius: size * 0.45, style: .continuous))
-                .shadow(color: Theme.accent.opacity(0.45), radius: size * 0.5)
-                .symbolEffect(.pulse, options: .repeat(2))
-            if showsWordmark {
-                Text("PULSE")
-                    .font(PulseFont.display(size * 0.78, relativeTo: .title, weight: .heavy))
-                    .tracking(size * 0.16)
-                    .foregroundStyle(Theme.text)
-            }
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Pulse")
     }
 }
 
@@ -331,12 +298,16 @@ private struct GlowBorder<S: InsettableShape>: ViewModifier {
 /// Number that counts up from zero the first time it appears.
 public struct CountUpText: View {
     let value: Int
+    var compact: Bool
     @State private var shown = 0
 
-    public init(_ value: Int) { self.value = value }
+    public init(_ value: Int, compact: Bool = false) {
+        self.value = value
+        self.compact = compact
+    }
 
     public var body: some View {
-        Text(shown, format: .number)
+        Text(shown, format: compact ? .number.notation(.compactName) : .number)
             .contentTransition(.numericText(value: Double(shown)))
             .task(id: value) {
                 withAnimation(.smooth(duration: 1.1)) { shown = value }

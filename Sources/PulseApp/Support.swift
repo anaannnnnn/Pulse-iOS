@@ -12,7 +12,7 @@ struct SplashView: View {
             AuroraBackground()
             PulseMark(size: 52)
                 .scaleEffect(breathe ? 1.04 : 0.96)
-                .shadow(color: Theme.accent.opacity(breathe ? 0.6 : 0.2), radius: 30)
+                .shadow(color: Theme.accent.opacity(breathe ? 0.35 : 0.1), radius: 30)
                 .animation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true), value: breathe)
         }
         .onAppear { breathe = true }

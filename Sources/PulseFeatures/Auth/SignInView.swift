@@ -63,7 +63,7 @@ struct SignInView: View {
                             .accessibilityAddTraits(.updatesFrequently)
                     }
                     Button { Task { await signIn() } } label: {
-                        if busy { ProgressView().tint(Theme.onAccent).frame(maxWidth: .infinity) }
+                        if busy { ProgressView().tint(.white).frame(maxWidth: .infinity) }
                         else { Text("Sign in").frame(maxWidth: .infinity) }
                     }
                     .buttonStyle(.pulsePrimary)

@@ -1,21 +1,17 @@
 #if canImport(SwiftUI) && canImport(UIKit)
 import UIKit
 
-/// UIKit appearance for the pieces SwiftUI cannot style: navigation titles in Syne, a clear bar at the scroll edge.
+/// UIKit appearance for navigation bars: clear at the scroll edge, a thin dark blur once content scrolls under it.
 public enum PulseAppearance {
     @MainActor
     public static func apply() {
-        PulseFonts.register()
-        let large = UIFont(name: "Syne-ExtraBold", size: 34) ?? .systemFont(ofSize: 34, weight: .heavy)
-        let inline = UIFont(name: "Syne-Bold", size: 17) ?? .systemFont(ofSize: 17, weight: .bold)
-        let ink = UIColor(red: 0.95, green: 0.96, blue: 0.96, alpha: 1)
-
+        let ink = UIColor(red: 0.96, green: 0.96, blue: 0.97, alpha: 1)
         let standard = UINavigationBarAppearance()
         standard.configureWithDefaultBackground()
         standard.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
-        standard.backgroundColor = UIColor(red: 0.02, green: 0.024, blue: 0.027, alpha: 0.55)
-        standard.titleTextAttributes = [.font: inline, .foregroundColor: ink]
-        standard.largeTitleTextAttributes = [.font: large, .foregroundColor: ink]
+        standard.backgroundColor = UIColor(red: 0.03, green: 0.03, blue: 0.04, alpha: 0.45)
+        standard.titleTextAttributes = [.foregroundColor: ink]
+        standard.largeTitleTextAttributes = [.foregroundColor: ink]
 
         let edge = UINavigationBarAppearance()
         edge.configureWithTransparentBackground()
