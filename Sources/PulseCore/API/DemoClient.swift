@@ -76,9 +76,9 @@ public final class DemoClient: PulseAPI, Sendable {
     public func absoluteURL(_ path: String) -> URL? { URL(string: path) }
     public func health() async throws -> HealthInfo { HealthInfo(ok: true, version: "demo", time: nil) }
     public func session() async throws -> SessionState { SessionState(locked: false) }
-    public func unlock(pin: String) async throws { await pause(); if pin != "6442" { throw PulseError.badPin } }
-    public func lock() async throws {}
-    public func changePin(current: String, new: String) async throws { await pause() }
+    public func signIn(email: String, password: String) async throws { await pause() }
+    public func signOut() async throws {}
+    public func changePassword(current: String, new: String) async throws { await pause() }
 
     public func home() async throws -> HomeFeed {
         await pause()

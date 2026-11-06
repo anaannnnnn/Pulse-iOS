@@ -30,7 +30,7 @@ struct UnreachableView: View {
                            actionTitle: "Try again") { Task { await session.refresh() } }
             VStack {
                 Spacer()
-                Button("Change server") { session.forgetServer() }.buttonStyle(.pulseGlass).padding(.bottom, 40)
+                Button("Sign out") { Task { await session.signOut() } }.buttonStyle(.pulseGlass).padding(.bottom, 40)
             }
         }
     }

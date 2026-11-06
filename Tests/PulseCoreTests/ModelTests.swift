@@ -156,8 +156,8 @@ struct SupportTests {
         let resp = HTTPURLResponse(url: URL(string: "https://x.test")!, statusCode: 429, httpVersion: nil, headerFields: ["Retry-After": "60"])
         #expect(PulseClient.mapError(status: 423, data: Data(), response: nil) == .locked)
         #expect(PulseClient.mapError(status: 429, data: Data(), response: resp) == .rateLimited(retryAfter: 60))
-        let bad = Data(#"{"error":{"code":"bad_pin","message":"no"}}"#.utf8)
-        #expect(PulseClient.mapError(status: 401, data: bad, response: nil) == .badPin)
+        let bad = Data(#"{"error":{"code":"bad_login","message":"Wrong email or password. 4 tries left."}}"#.utf8)
+        #expect(PulseClient.mapError(status: 401, data: bad, response: nil) == .badCredentials("Wrong email or password. 4 tries left."))
         let pc = Data(#"{"error":{"code":"pcloud_not_connected","message":"x"}}"#.utf8)
         #expect(PulseClient.mapError(status: 409, data: pc, response: nil) == .pcloudNotConnected)
     }
@@ -166,15 +166,30 @@ struct SupportTests {
 @Suite("Stores")
 @MainActor
 struct StoreTests {
-    @Test func demoSessionUnlocksWithDefaultPin() async {
+    @Test func demoSessionIsSignedInImmediately() async {
         let defaults = UserDefaults(suiteName: "pulse.tests.\(UUID().uuidString)")!
         let session = AppSession(defaults: defaults)
+        #expect(session.serverURL == PulseDefaults.serverURL)
         session.enterDemo()
-        #expect(session.phase == .locked)
-        #expect(await session.unlock(pin: "0000") == false)
-        #expect(session.pinError != nil)
-        #expect(await session.unlock(pin: "6442"))
         #expect(session.phase == .unlocked)
+        await session.signOut()
+        #expect(session.phase == .signedOut)
+        #expect(!session.isDemo)
+    }
+
+    @Test func signInRejectsEmptyFields() async {
+        let defaults = UserDefaults(suiteName: "pulse.tests.\(UUID().uuidString)")!
+        let session = AppSession(defaults: defaults)
+        #expect(await session.signIn(email: " ", password: "") == false)
+        #expect(session.authError != nil)
+    }
+
+    @Test func customServerOverridesDefault() async {
+        let defaults = UserDefaults(suiteName: "pulse.tests.\(UUID().uuidString)")!
+        let session = AppSession(defaults: defaults)
+        defaults.set("http://192.168.1.5:8787", forKey: "pulse.serverURL")
+        #expect(session.serverURL.absoluteString == "http://192.168.1.5:8787")
+        #expect(session.usesCustomServer)
     }
 
     @Test func libraryStoreLoadsAndPaginates() async {

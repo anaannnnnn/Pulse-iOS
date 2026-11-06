@@ -2,7 +2,7 @@ import Foundation
 
 public enum PulseError: Error, Equatable, Sendable, LocalizedError {
     case locked
-    case badPin
+    case badCredentials(String)
     case rateLimited(retryAfter: TimeInterval?)
     case notFound
     case badRequest(String)
@@ -17,8 +17,8 @@ public enum PulseError: Error, Equatable, Sendable, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .locked: "Pulse is locked. Enter your passcode."
-        case .badPin: "That passcode is wrong."
+        case .locked: "Sign in to continue."
+        case .badCredentials(let m): m
         case .rateLimited(let wait):
             if let wait { "Too many tries. Try again in \(Int(wait.rounded(.up))) seconds." }
             else { "Too many tries. Try again later." }

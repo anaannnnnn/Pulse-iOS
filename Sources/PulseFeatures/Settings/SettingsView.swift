@@ -6,18 +6,21 @@ import PulseDesign
 public struct SettingsView: View {
     @Environment(StoreBundle.self) private var stores
     @Environment(AppSession.self) private var session
-    @State private var confirmLock = false
+    @Environment(PlayerCoordinator.self) private var coordinator
+    @State private var confirmSignOut = false
 
     public init() {}
 
     public var body: some View {
+        @Bindable var coordinator = self.coordinator
         List {
             Section {
                 connectionCard
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets())
             }
-            Section("Library") {
+            Section("Libraries") {
+                row(.libraries, "Libraries & platforms", "square.stack.3d.up.fill")
                 row(.pcloud, "pCloud", "icloud.fill")
                 row(.torbox, "TorBox", "arrow.down.circle.fill")
                 row(.matching, "Matching & review", "wand.and.stars")
@@ -32,9 +35,8 @@ public struct SettingsView: View {
                 row(.about, "About Pulse", "info.circle.fill")
             }
             Section {
-                Button("Lock now", systemImage: "lock.fill") { Task { await session.lock() } }
-                Button(session.isDemo ? "Exit demo" : "Disconnect from server", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
-                    confirmLock = true
+                Button(session.isDemo ? "Exit demo" : "Sign out", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
+                    confirmSignOut = true
                 }
             }
         }
@@ -42,9 +44,10 @@ public struct SettingsView: View {
         .pulseScreenBackground(intensity: 0.5)
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.large)
-        .confirmationDialog("Disconnect from this server?", isPresented: $confirmLock, titleVisibility: .visible) {
-            Button("Disconnect", role: .destructive) { session.forgetServer() }
-        } message: { Text("You can reconnect any time with the server address.") }
+        .confirmationDialog(session.isDemo ? "Exit the demo?" : "Sign out of Pulse?", isPresented: $confirmSignOut, titleVisibility: .visible) {
+            Button(session.isDemo ? "Exit demo" : "Sign out", role: .destructive) { Task { await session.signOut() } }
+        } message: { Text("You can sign back in with your email and password.") }
+        .navigationDestination(isPresented: $coordinator.showLibraries) { LibrariesView() }
         .navigationDestination(for: Route.self) { RouteDestination(route: $0) }
         .task { await stores.settings.load() }
     }
@@ -66,8 +69,8 @@ public struct SettingsView: View {
                 .frame(width: 56, height: 56)
                 .pulseGlass(in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             VStack(alignment: .leading, spacing: 3) {
-                Text(session.isDemo ? "Demo library" : (session.serverURL?.host ?? "Server")).font(PulseFont.title(.headline)).foregroundStyle(Theme.text)
-                Text(session.isDemo ? "Sample data, no server needed" : "Connected").font(.footnote).foregroundStyle(Theme.success)
+                Text(session.isDemo ? "Demo library" : (session.email.isEmpty ? "Signed in" : session.email)).font(PulseFont.title(.headline)).foregroundStyle(Theme.text).lineLimit(1)
+                Text(session.isDemo ? "Sample data, no account needed" : (session.serverURL.host() ?? "Pulse")).font(.footnote).foregroundStyle(Theme.success)
             }
             Spacer()
             Circle().fill(Theme.success).frame(width: 10, height: 10)
@@ -85,6 +88,7 @@ struct SettingsPageView: View {
 
     var body: some View {
         switch page {
+        case .libraries: LibrariesView()
         case .playback: PlaybackSettingsView()
         case .privacy: PrivacySettingsView()
         case .pcloud: PcloudSettingsView()

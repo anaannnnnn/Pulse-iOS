@@ -102,7 +102,7 @@ public struct SessionState: Codable, Hashable, Sendable {
     public struct Configured: Codable, Hashable, Sendable { public let configured: Bool }
 
     public let locked: Bool
-    public let pinEnabled: Bool
+    public let pinEnabled: Bool?
     public let pcloud: Cloud?
     public let torbox: Linked?
     public let tpdb: Configured?

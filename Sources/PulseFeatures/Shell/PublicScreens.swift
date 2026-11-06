@@ -4,14 +4,9 @@ import PulseCore
 
 // Public entry points the app target composes. Everything else in this module stays internal.
 
-public struct LockScreen: View {
+public struct SignInScreen: View {
     public init() {}
-    public var body: some View { LockView() }
-}
-
-public struct ServerSetupScreen: View {
-    public init() {}
-    public var body: some View { ServerSetupView() }
+    public var body: some View { SignInView() }
 }
 
 public struct PulsePlayerScreen: View {

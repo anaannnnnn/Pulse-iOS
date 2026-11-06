@@ -59,8 +59,8 @@ public struct HomeView: View {
             ErrorStateView(error.errorDescription ?? "Couldn't load your library.") { Task { await stores.home.load(force: true) } }
         case .loaded(let feed):
             if stores.home.libraryIsEmpty {
-                EmptyStateView("Your library is empty", message: "Connect pCloud or TorBox in Settings, then scan to add videos.",
-                               systemImage: "externaldrive.badge.plus")
+                EmptyStateView("Add your first library", message: "Connect pCloud or TorBox, choose your folders, and Pulse builds your library.",
+                               systemImage: "externaldrive.badge.plus", actionTitle: "Add a library") { player.openLibraries() }
             } else {
                 if !feed.hero.isEmpty { HeroCarousel(videos: feed.hero, index: $heroIndex) }
                 stats(feed)

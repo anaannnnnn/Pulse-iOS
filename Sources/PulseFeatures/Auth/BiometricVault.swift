@@ -3,10 +3,12 @@ import Foundation
 import LocalAuthentication
 import Security
 
-/// Stores the Pulse passcode in the Keychain behind Face ID / Touch ID so the keypad can be skipped.
+/// Keeps the account email and password in the Keychain behind Face ID / Touch ID so sign-in is one look.
 enum BiometricVault {
-    private static let service = "app.pulse.passcode"
-    private static let account = "pin"
+    struct Credentials: Codable { let email: String; let password: String }
+
+    private static let service = "app.pulse.credentials"
+    private static let account = "login"
 
     static var availableType: LABiometryType {
         let context = LAContext()
@@ -19,21 +21,26 @@ enum BiometricVault {
     static var name: String { availableType == .touchID ? "Touch ID" : "Face ID" }
     static var isAvailable: Bool { availableType != .none }
 
-    static var hasStoredPIN: Bool {
+    static var hasStoredCredentials: Bool {
+        let context = LAContext()
+        context.interactionNotAllowed = true
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service, kSecAttrAccount as String: account,
-            kSecUseAuthenticationUI as String: kSecUseAuthenticationUIFail, kSecReturnData as String: false,
+            kSecUseAuthenticationContext as String: context, kSecReturnData as String: false,
         ]
         let status = SecItemCopyMatching(query as CFDictionary, nil)
         return status == errSecSuccess || status == errSecInteractionNotAllowed
     }
 
-    static func store(pin: String) -> Bool {
+    @discardableResult
+    static func store(email: String, password: String) -> Bool {
         remove()
-        guard let access = SecAccessControlCreateWithFlags(nil, kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly, .biometryCurrentSet, nil) else { return false }
+        guard let data = try? JSONEncoder().encode(Credentials(email: email, password: password)),
+              let access = SecAccessControlCreateWithFlags(nil, kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly, .biometryCurrentSet, nil)
+        else { return false }
         let attributes: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service, kSecAttrAccount as String: account,
-            kSecValueData as String: Data(pin.utf8), kSecAttrAccessControl as String: access,
+            kSecValueData as String: data, kSecAttrAccessControl as String: access,
         ]
         return SecItemAdd(attributes as CFDictionary, nil) == errSecSuccess
     }
@@ -43,8 +50,8 @@ enum BiometricVault {
         SecItemDelete(query as CFDictionary)
     }
 
-    /// Prompts for Face ID and returns the stored passcode, or nil if cancelled/failed.
-    static func readPIN(reason: String) async -> String? {
+    /// Prompts for Face ID and returns the stored login, or nil if cancelled or failed.
+    static func read(reason: String) async -> Credentials? {
         await withCheckedContinuation { continuation in
             let context = LAContext()
             context.localizedReason = reason
@@ -55,7 +62,7 @@ enum BiometricVault {
             DispatchQueue.global(qos: .userInitiated).async {
                 var item: CFTypeRef?
                 let status = SecItemCopyMatching(query as CFDictionary, &item)
-                if status == errSecSuccess, let data = item as? Data { continuation.resume(returning: String(data: data, encoding: .utf8)) }
+                if status == errSecSuccess, let data = item as? Data { continuation.resume(returning: try? JSONDecoder().decode(Credentials.self, from: data)) }
                 else { continuation.resume(returning: nil) }
             }
         }

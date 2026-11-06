@@ -6,26 +6,28 @@ import PulseDesign
 struct PrivacySettingsView: View {
     @Environment(StoreBundle.self) private var stores
     @Environment(AppSession.self) private var session
-    @State private var biometrics = BiometricVault.hasStoredPIN
-    @State private var showChangePin = false
-    @State private var enroll = false
+    @State private var showChangePassword = false
+    @State private var biometricsOn = BiometricVault.hasStoredCredentials
+    @State private var enrolling = false
+    @State private var enrollPassword = ""
 
     var body: some View {
         @Bindable var store = stores.settings
         SettingsForm(title: "Privacy & security") {
             Section {
-                Picker("Auto-lock", selection: $store.settings.autoLockMinutes) {
+                LabeledContent("Signed in as", value: session.isDemo ? "Demo" : (session.email.isEmpty ? "—" : session.email))
+                if !session.isDemo { Button("Change password", systemImage: "key.fill") { showChangePassword = true } }
+                if BiometricVault.isAvailable && !session.isDemo {
+                    Toggle(isOn: Binding(get: { biometricsOn }, set: { setBiometrics($0) })) {
+                        Label("Sign in with \(BiometricVault.name)", systemImage: BiometricVault.symbol)
+                    }
+                }
+                Picker("Sign out when idle", selection: $store.settings.autoLockMinutes) {
                     Text("Never").tag(0)
                     ForEach([1, 5, 15, 30, 60], id: \.self) { Text("After \($0) min").tag($0) }
                 }
-                if BiometricVault.isAvailable && !session.isDemo {
-                    Toggle(isOn: Binding(get: { biometrics }, set: { setBiometrics($0) })) {
-                        Label("Unlock with \(BiometricVault.name)", systemImage: BiometricVault.symbol)
-                    }
-                }
-                Button("Change passcode", systemImage: "key.fill") { showChangePin = true }
-            } header: { Text("Passcode") } footer: {
-                Text("The passcode is checked by your server. Six wrong tries lock you out for a minute, then longer.")
+            } header: { Text("Account") } footer: {
+                Text("Your account is checked by your Pulse server. After several wrong tries sign-in is paused for a while.")
             }
             Section {
                 Toggle("Blur thumbnails", isOn: $store.settings.blurThumbnails)
@@ -37,32 +39,31 @@ struct PrivacySettingsView: View {
         .onChange(of: store.settings.autoLockMinutes) { _, minutes in session.configureAutoLock(minutes: minutes); store.scheduleSave() }
         .onChange(of: store.settings.blurThumbnails) { _, _ in store.scheduleSave() }
         .onChange(of: store.settings.hideFromRecents) { _, _ in store.scheduleSave() }
-        .sheet(isPresented: $showChangePin) { ChangePinSheet().presentationDetents([.medium]) }
-        .alert("Re-enter your passcode", isPresented: $enroll) {
-            SecureField("Passcode", text: $pinForEnroll).keyboardType(.numberPad)
-            Button("Enable") { storePinForBiometrics() }
-            Button("Cancel", role: .cancel) { biometrics = false }
-        } message: { Text("It is stored in the Keychain and released only by \(BiometricVault.name).") }
+        .sheet(isPresented: $showChangePassword) { ChangePasswordSheet().presentationDetents([.medium]) }
+        .alert("Confirm your password", isPresented: $enrolling) {
+            SecureField("Password", text: $enrollPassword)
+            Button("Enable") { enableBiometrics() }
+            Button("Cancel", role: .cancel) { biometricsOn = false; enrollPassword = "" }
+        } message: { Text("It is kept in the Keychain and released only by \(BiometricVault.name).") }
         .task { await store.load() }
     }
 
-    @State private var pinForEnroll = ""
-
     private func setBiometrics(_ on: Bool) {
-        if on { pinForEnroll = ""; enroll = true } else { BiometricVault.remove(); biometrics = false }
+        if on { enrollPassword = ""; enrolling = true } else { BiometricVault.remove(); biometricsOn = false }
     }
 
-    private func storePinForBiometrics() {
-        let pin = pinForEnroll
+    private func enableBiometrics() {
+        let password = enrollPassword
+        enrollPassword = ""
         Task {
-            let ok = await stores.settings.changePin(current: pin, new: pin)
-            biometrics = ok && BiometricVault.store(pin: pin)
-            pinForEnroll = ""
+            // Prove the password is right before saving it.
+            let ok = await session.verify(password: password)
+            biometricsOn = ok && BiometricVault.store(email: session.email, password: password)
         }
     }
 }
 
-struct ChangePinSheet: View {
+struct ChangePasswordSheet: View {
     @Environment(StoreBundle.self) private var stores
     @Environment(\.dismiss) private var dismiss
     @State private var current = ""
@@ -71,25 +72,23 @@ struct ChangePinSheet: View {
     @State private var busy = false
     @State private var error: String?
 
-    private var valid: Bool {
-        (4...8).contains(new.count) && new.allSatisfy(\.isNumber) && new == confirm && !current.isEmpty
-    }
+    private var valid: Bool { new.count >= 8 && new == confirm && !current.isEmpty }
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Current") { SecureField("Current passcode", text: $current).keyboardType(.numberPad).textContentType(.password) }
+                Section("Current") { SecureField("Current password", text: $current).textContentType(.password) }
                 Section {
-                    SecureField("New passcode (4–8 digits)", text: $new).keyboardType(.numberPad).textContentType(.newPassword)
-                    SecureField("Repeat new passcode", text: $confirm).keyboardType(.numberPad).textContentType(.newPassword)
+                    SecureField("New password (8+ characters)", text: $new).textContentType(.newPassword)
+                    SecureField("Repeat new password", text: $confirm).textContentType(.newPassword)
                 } header: { Text("New") } footer: {
                     if let error { Text(error).foregroundStyle(Theme.danger) }
-                    else if !confirm.isEmpty && new != confirm { Text("The passcodes don't match.").foregroundStyle(Theme.danger) }
-                    else { Text("Changing the passcode signs out every other device.") }
+                    else if !confirm.isEmpty && new != confirm { Text("The passwords don't match.").foregroundStyle(Theme.danger) }
+                    else { Text("Changing your password signs you out everywhere else.") }
                 }
             }
             .scrollContentBackground(.hidden)
-            .navigationTitle("Change passcode")
+            .navigationTitle("Change password")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
@@ -97,7 +96,7 @@ struct ChangePinSheet: View {
                     Button("Save") {
                         busy = true
                         Task {
-                            let ok = await stores.settings.changePin(current: current, new: new)
+                            let ok = await stores.settings.changePassword(current: current, new: new)
                             busy = false
                             if ok { BiometricVault.remove(); dismiss() } else { error = stores.settings.message; stores.settings.message = nil }
                         }

@@ -5,13 +5,15 @@ It speaks the server's `/api` contract (`docs/API.md` in the Pulse repo) and mir
 
 * iOS 18+ (Liquid Glass automatically on iOS 26+ when built with Xcode 26)
 * Swift 6 package, no third-party dependencies
-* Everything works offline of any server through the built-in **Demo library** (passcode `6442`)
+* Signs in to your Pulse server (default `pulse.devxpert.online`) with the same email and password as the web app
+* Everything works without any account through the built-in **Demo library**
 
 ## Features
 
 | Area | What you get |
 |---|---|
-| Lock | Server-enforced passcode keypad, Face ID / Touch ID via Keychain, auto-lock, privacy cover in the app switcher, blur-thumbnails option |
+| Sign in | Email and password (same account as the server), Face ID / Touch ID sign-in via Keychain, idle sign-out, privacy cover in the app switcher, blur-thumbnails option |
+| Libraries | Add and manage platforms like the server does: connect pCloud (sign-in or pasted code), pick folders, scan; link TorBox, browse and import downloads; auto-match and scan-interval settings |
 | Home | Greeting, swipeable hero banner, library stats, rails: continue watching, recent, favourites, top performers, unwatched |
 | Library | Adaptive grid or list, debounced search, sort (7 orders), filter sheet (tags, performers, studios, year, length, progress, source, match state), infinite scroll |
 | Search | Global search across videos, performers, studios with recent searches |
@@ -48,7 +50,7 @@ open Pulse.xcodeproj            # choose your team under Signing & Capabilities,
 
 Or open `Package.swift` in Xcode to work on the modules directly.
 
-On first launch enter the address of your server (`192.168.1.20:8787`, a Tailscale name, or your tunnel URL) or tap **Explore the demo library**.
+On first launch sign in with your Pulse email and password. Under **Settings → Libraries** connect pCloud and TorBox. The server address is built in; **Server** under the sign-in form lets you point at your own copy.
 
 ## Tests
 

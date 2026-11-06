@@ -64,7 +64,7 @@ public final class PulseClient: PulseAPI, @unchecked Sendable {
         let message = envelope?.error?.message ?? HTTPURLResponse.localizedString(forStatusCode: status)
         switch (status, code) {
         case (423, _), (_, "locked"): return .locked
-        case (401, "bad_pin"): return .badPin
+        case (401, _): return .badCredentials(message)
         case (429, _):
             let wait = response?.value(forHTTPHeaderField: "Retry-After").flatMap(TimeInterval.init)
             return .rateLimited(retryAfter: wait)
@@ -101,16 +101,16 @@ public final class PulseClient: PulseAPI, @unchecked Sendable {
     public func health() async throws -> HealthInfo { try await get("/api/health") }
     public func session() async throws -> SessionState { try await get("/api/session") }
 
-    public func unlock(pin: String) async throws {
-        struct Body: Encodable { let pin: String }
-        try await sendVoid(.post, "/api/session/unlock", body: Body(pin: pin))
+    public func signIn(email: String, password: String) async throws {
+        struct Body: Encodable { let email: String; let password: String }
+        try await sendVoid(.post, "/api/session/login", body: Body(email: email, password: password))
     }
 
-    public func lock() async throws { try await sendVoid(.post, "/api/session/lock", body: EmptyBody()) }
+    public func signOut() async throws { try await sendVoid(.post, "/api/session/lock", body: EmptyBody()) }
 
-    public func changePin(current: String, new: String) async throws {
-        struct Body: Encodable { let pin: String; let currentPin: String }
-        try await sendVoid(.post, "/api/settings/pin", body: Body(pin: new, currentPin: current))
+    public func changePassword(current: String, new: String) async throws {
+        struct Body: Encodable { let password: String; let currentPassword: String }
+        try await sendVoid(.post, "/api/settings/password", body: Body(password: new, currentPassword: current))
     }
 
     // MARK: Browse

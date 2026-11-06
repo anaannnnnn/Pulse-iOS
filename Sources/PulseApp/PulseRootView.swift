@@ -47,8 +47,7 @@ public struct PulseRootView: View {
     private var phaseContent: some View {
         switch session.phase {
         case .booting: SplashView()
-        case .needsServer, .connecting: ServerSetupScreen()
-        case .locked: LockScreen()
+        case .signedOut, .signingIn: SignInScreen()
         case .unreachable(let message): UnreachableView(message: message)
         case .unlocked:
             if let stores {
@@ -68,12 +67,11 @@ public struct PulseRootView: View {
                 await stores?.settings.load()
                 if let minutes = stores?.settings.settings.autoLockMinutes { session.configureAutoLock(minutes: minutes) }
             }
-        case .needsServer:
+        case .signedOut:
             stores = nil
             coordinator.scene = nil
-        case .locked:
-            coordinator.scene = nil
             coordinator.tonightOpen = false
+            coordinator.showLibraries = false
         default: break
         }
     }

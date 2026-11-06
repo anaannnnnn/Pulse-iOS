@@ -7,9 +7,9 @@ public protocol PulseAPI: Sendable {
     // Session
     func health() async throws -> HealthInfo
     func session() async throws -> SessionState
-    func unlock(pin: String) async throws
-    func lock() async throws
-    func changePin(current: String, new: String) async throws
+    func signIn(email: String, password: String) async throws
+    func signOut() async throws
+    func changePassword(current: String, new: String) async throws
 
     // Browse
     func home() async throws -> HomeFeed

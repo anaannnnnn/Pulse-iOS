@@ -241,8 +241,8 @@ public final class SettingsStore {
         catch { message = error.asPulseError.errorDescription }
     }
 
-    public func changePin(current: String, new: String) async -> Bool {
-        do { try await api.changePin(current: current, new: new); return true }
+    public func changePassword(current: String, new: String) async -> Bool {
+        do { try await api.changePassword(current: current, new: new); return true }
         catch { message = error.asPulseError.errorDescription; return false }
     }
 
