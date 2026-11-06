@@ -122,7 +122,7 @@ struct PerformerDetailView: View {
                 .padding(.horizontal, Theme.Space.page)
             }
         }
-        .padding(.bottom, 100)
+        .padding(.bottom, 24)
     }
 }
 
@@ -160,7 +160,7 @@ struct StudioDetailView: View {
                     .padding(.horizontal, Theme.Space.page)
                 }
                 .padding(.vertical, 16)
-                .padding(.bottom, 100)
+                .padding(.bottom, 24)
             }
         }
         .scrollIndicators(.hidden)
@@ -191,7 +191,7 @@ struct FilteredLibraryView: View {
                 }
             }
             .padding(Theme.Space.page)
-            .padding(.bottom, 100)
+            .padding(.bottom, 24)
         }
         .scrollIndicators(.hidden)
         .pulseScreenBackground(intensity: 0.5)

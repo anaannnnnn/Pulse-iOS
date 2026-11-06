@@ -9,7 +9,7 @@ public struct Shimmer: View {
 
     public var body: some View {
         GeometryReader { proxy in
-            LinearGradient(colors: [.clear, .white.opacity(0.10), .clear], startPoint: .leading, endPoint: .trailing)
+            LinearGradient(colors: [.clear, .white.opacity(0.09), .clear], startPoint: .leading, endPoint: .trailing)
                 .frame(width: proxy.size.width * 0.7)
                 .offset(x: phase * proxy.size.width * 1.4)
         }
@@ -22,7 +22,7 @@ public struct Shimmer: View {
     }
 }
 
-/// Circular progress with a violet angular gradient.
+/// Circular progress with a mint gradient.
 public struct ProgressRing: View {
     let fraction: Double
     var lineWidth: CGFloat
@@ -64,38 +64,110 @@ public struct Chip: View {
             Text(text).font(.caption.weight(.semibold))
         }
         .foregroundStyle(tint ?? Theme.text)
-        .padding(.horizontal, 10)
-        .frame(minHeight: 26)
+        .padding(.horizontal, 11)
+        .frame(minHeight: 28)
         .background(.black.opacity(0.35), in: Capsule())
         .background(.ultraThinMaterial, in: Capsule())
-        .overlay(Capsule().strokeBorder(Theme.line, lineWidth: 1))
+        .overlay(Capsule().strokeBorder(Theme.rim, lineWidth: 0.8))
+    }
+}
+
+/// Small count pill next to a heading ("Collections 8").
+public struct CountBadge: View {
+    let value: Int
+
+    public init(_ value: Int) { self.value = value }
+
+    public var body: some View {
+        Text(value, format: .number)
+            .font(.caption.weight(.bold).monospacedDigit())
+            .foregroundStyle(Theme.text)
+            .contentTransition(.numericText())
+            .padding(.horizontal, 9)
+            .frame(minHeight: 24)
+            .background(.white.opacity(0.12), in: Capsule())
+            .animation(Theme.tap, value: value)
+    }
+}
+
+/// Sliding-pill segmented control (replaces the stock segmented Picker).
+public struct PulseSegmented<Value: Hashable>: View {
+    let options: [(value: Value, title: LocalizedStringKey, icon: String?)]
+    @Binding var selection: Value
+    @Namespace private var pill
+
+    public init(selection: Binding<Value>, options: [(value: Value, title: LocalizedStringKey, icon: String?)]) {
+        self._selection = selection
+        self.options = options
+    }
+
+    public var body: some View {
+        HStack(spacing: 2) {
+            ForEach(options.indices, id: \.self) { i in
+                let option = options[i]
+                let selected = option.value == selection
+                Button {
+                    withAnimation(Theme.glide) { selection = option.value }
+                } label: {
+                    HStack(spacing: 6) {
+                        if let icon = option.icon { Image(systemName: icon).font(.caption.weight(.bold)) }
+                        Text(option.title).font(.subheadline.weight(.semibold))
+                    }
+                    .foregroundStyle(selected ? Color(hex: 0x0A0C0D) : Theme.textSecondary)
+                    .frame(maxWidth: .infinity, minHeight: 40)
+                    .background {
+                        if selected {
+                            Capsule().fill(LinearGradient(colors: [.white, Color(hex: 0xDDE3E1)], startPoint: .top, endPoint: .bottom))
+                                .shadow(color: .white.opacity(0.18), radius: 10, y: 3)
+                                .matchedGeometryEffect(id: "pill", in: pill)
+                        }
+                    }
+                    .contentShape(Capsule())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(selected ? .isSelected : [])
+            }
+        }
+        .padding(4)
+        .pulseCapsuleGlass()
+        .sensoryFeedback(.selection, trigger: selection)
     }
 }
 
 public struct SectionHeader: View {
     let title: LocalizedStringKey
     var subtitle: String?
+    var count: Int?
     var action: (() -> Void)?
 
-    public init(_ title: LocalizedStringKey, subtitle: String? = nil, action: (() -> Void)? = nil) {
+    public init(_ title: LocalizedStringKey, subtitle: String? = nil, count: Int? = nil, action: (() -> Void)? = nil) {
         self.title = title
         self.subtitle = subtitle
+        self.count = count
         self.action = action
     }
 
     public var body: some View {
-        HStack(alignment: .firstTextBaseline) {
+        HStack(alignment: .center, spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(PulseFont.title(.title3)).foregroundStyle(Theme.text)
+                HStack(spacing: 8) {
+                    Text(title).font(PulseFont.title(.title3)).foregroundStyle(Theme.text)
+                    if let count { CountBadge(count) }
+                }
                 if let subtitle { Text(subtitle).font(.footnote).foregroundStyle(Theme.textSecondary) }
             }
             .accessibilityAddTraits(.isHeader)
             Spacer()
             if let action {
-                Button("See all", action: action)
-                    .font(PulseFont.label(.subheadline))
-                    .foregroundStyle(Theme.accentSoft)
-                    .frame(minHeight: 44)
+                Button(action: action) {
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(Theme.text)
+                        .frame(width: 40, height: 40)
+                        .pulseGlass(in: Circle())
+                }
+                .buttonStyle(.pressable)
+                .accessibilityLabel("See all")
             }
         }
         .padding(.horizontal, Theme.Space.page)
@@ -151,7 +223,7 @@ public struct ErrorStateView: View {
     }
 }
 
-/// Wide Pulse wordmark with a heartbeat glyph.
+/// Pulse wordmark with a heartbeat tile.
 public struct PulseMark: View {
     var size: CGFloat
     var showsWordmark: Bool
@@ -164,13 +236,16 @@ public struct PulseMark: View {
     public var body: some View {
         HStack(spacing: size * 0.3) {
             Image(systemName: "waveform.path.ecg")
-                .font(.system(size: size, weight: .bold))
-                .foregroundStyle(Theme.gradient)
+                .font(.system(size: size * 0.9, weight: .bold))
+                .foregroundStyle(Theme.onAccent)
+                .frame(width: size * 1.45, height: size * 1.45)
+                .background(Theme.gradient, in: RoundedRectangle(cornerRadius: size * 0.45, style: .continuous))
+                .shadow(color: Theme.accent.opacity(0.45), radius: size * 0.5)
                 .symbolEffect(.pulse, options: .repeat(2))
             if showsWordmark {
                 Text("PULSE")
-                    .font(PulseFont.display(size * 0.8, relativeTo: .title))
-                    .tracking(size * 0.14)
+                    .font(PulseFont.display(size * 0.78, relativeTo: .title, weight: .heavy))
+                    .tracking(size * 0.16)
                     .foregroundStyle(Theme.text)
             }
         }
@@ -208,11 +283,64 @@ public struct ToastModifier: ViewModifier {
 public extension View {
     func pulseToast(_ message: Binding<String?>) -> some View { modifier(ToastModifier(message: message)) }
 
-    /// Cards fade and scale as they scroll in/out of view.
+    /// Cards fade, scale and sink slightly as they scroll in/out of view.
     func pulseScrollReveal() -> some View {
         scrollTransition(.animated(.smooth).threshold(.visible(0.15))) { content, phase in
-            content.opacity(phase.isIdentity ? 1 : 0.35).scaleEffect(phase.isIdentity ? 1 : 0.92)
+            content
+                .opacity(phase.isIdentity ? 1 : 0.3)
+                .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                .blur(radius: phase.isIdentity ? 0 : 3)
         }
+    }
+
+    /// Curved carousel: neighbours swing away on a Y axis and shrink, like the category cards in the references.
+    func pulseCurvedCarousel(angle: Double = 24) -> some View {
+        scrollTransition(.interactive, axis: .horizontal) { content, phase in
+            content
+                .rotation3DEffect(.degrees(phase.value * -angle), axis: (x: 0, y: 1, z: 0), perspective: 0.55)
+                .scaleEffect(1 - abs(phase.value) * 0.1)
+                .offset(x: phase.value * -14)
+                .opacity(1 - abs(phase.value) * 0.35)
+        }
+    }
+
+    /// Slowly rotating mint highlight around a shape's edge. Static under Reduce Motion.
+    func pulseGlowBorder<S: InsettableShape>(_ shape: S, lineWidth: CGFloat = 1.4) -> some View {
+        modifier(GlowBorder(shape: shape, lineWidth: lineWidth))
+    }
+}
+
+private struct GlowBorder<S: InsettableShape>: ViewModifier {
+    let shape: S
+    let lineWidth: CGFloat
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content.overlay {
+            TimelineView(.animation(minimumInterval: 1.0 / 30, paused: reduceMotion)) { context in
+                let angle = reduceMotion ? 30 : (context.date.timeIntervalSinceReferenceDate * 40).truncatingRemainder(dividingBy: 360)
+                shape.strokeBorder(
+                    AngularGradient(colors: [.clear, Theme.accent.opacity(0.9), .white.opacity(0.9), .clear, .clear], center: .center, angle: .degrees(angle)),
+                    lineWidth: lineWidth)
+            }
+            .allowsHitTesting(false)
+        }
+    }
+}
+
+/// Number that counts up from zero the first time it appears.
+public struct CountUpText: View {
+    let value: Int
+    @State private var shown = 0
+
+    public init(_ value: Int) { self.value = value }
+
+    public var body: some View {
+        Text(shown, format: .number)
+            .contentTransition(.numericText(value: Double(shown)))
+            .task(id: value) {
+                withAnimation(.smooth(duration: 1.1)) { shown = value }
+            }
     }
 }
 #endif

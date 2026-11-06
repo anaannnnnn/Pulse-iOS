@@ -11,6 +11,7 @@ public struct SearchView: View {
     @State private var performers: [Performer] = []
     @State private var studios: [Studio] = []
     @State private var searching = false
+    @FocusState private var focused: Bool
     @State private var recents: [String] = UserDefaults.standard.stringArray(forKey: "pulse.recentSearches") ?? []
 
     public init() {}
@@ -20,22 +21,66 @@ public struct SearchView: View {
     public var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 26) {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Search").font(PulseFont.display(34, relativeTo: .largeTitle, weight: .heavy)).tracking(-0.6).foregroundStyle(Theme.text)
+                    searchField
+                }
+                .padding(.horizontal, Theme.Space.page)
+                .padding(.top, 8)
                 if trimmed.isEmpty { recentsSection }
                 else if videos.isEmpty && performers.isEmpty && studios.isEmpty && !searching {
                     EmptyStateView("No results", message: "Nothing matches “\(trimmed)”. Try a performer, studio or part of a title.", systemImage: "magnifyingglass")
                 } else { results }
             }
-            .padding(.vertical, 12)
-            .padding(.bottom, 120)
+            .padding(.bottom, 24)
+            .animation(Theme.glide, value: trimmed.isEmpty)
         }
         .scrollIndicators(.hidden)
-        .scrollDismissesKeyboard(.immediately)
-        .pulseScreenBackground(intensity: 0.5)
-        .navigationTitle("Search")
-        .searchable(text: $text, prompt: "Videos, performers, studios")
-        .onSubmit(of: .search) { remember(trimmed) }
+        .scrollDismissesKeyboard(.interactively)
+        .background { backdrop }
+        .toolbar(.hidden, for: .navigationBar)
+        .onSubmit(of: .text) { remember(trimmed) }
         .task(id: trimmed) { await run(trimmed) }
         .navigationDestination(for: Route.self) { RouteDestination(route: $0) }
+    }
+
+    @ViewBuilder
+    private var backdrop: some View {
+        if let first = videos.first, !trimmed.isEmpty { AmbientBackdrop(path: first.poster ?? first.thumb, seed: first.id, strength: 0.4) }
+        else { AuroraBackground(intensity: 0.8) }
+    }
+
+    /// Large glass pill. Its rim lights up mint while typing.
+    private var searchField: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 19, weight: .semibold))
+                .foregroundStyle(focused ? Theme.accent : Theme.textSecondary)
+                .symbolEffect(.bounce, value: focused)
+            TextField("Videos, performers, studios", text: $text)
+                .font(.system(size: 18, weight: .medium))
+                .foregroundStyle(Theme.text)
+                .tint(Theme.accent)
+                .focused($focused)
+                .submitLabel(.search)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+            if searching {
+                ProgressView().tint(Theme.accent)
+            } else if !text.isEmpty {
+                Button { withAnimation(Theme.tap) { text = "" } } label: {
+                    Image(systemName: "xmark.circle.fill").font(.system(size: 20)).foregroundStyle(Theme.textSecondary)
+                }
+                .transition(.scale.combined(with: .opacity))
+                .accessibilityLabel("Clear search")
+            }
+        }
+        .padding(.horizontal, 20)
+        .frame(height: 60)
+        .pulseGlass(in: RoundedRectangle(cornerRadius: 30, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).strokeBorder(Theme.accent.opacity(focused ? 0.75 : 0), lineWidth: 1.5))
+        .shadow(color: Theme.accent.opacity(focused ? 0.28 : 0), radius: 18)
+        .animation(Theme.tap, value: focused)
     }
 
     @ViewBuilder
@@ -45,10 +90,10 @@ public struct SearchView: View {
         } else {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("Recent").font(PulseFont.title(.headline)).foregroundStyle(Theme.text)
+                    Text("Recent").font(PulseFont.title(.title3)).foregroundStyle(Theme.text)
                     Spacer()
                     Button("Clear") { recents = []; UserDefaults.standard.removeObject(forKey: "pulse.recentSearches") }
-                        .font(.footnote).foregroundStyle(Theme.accentSoft)
+                        .font(.footnote.weight(.semibold)).foregroundStyle(Theme.accent)
                 }
                 FlowLayout(spacing: 8) {
                     ForEach(recents, id: \.self) { term in
@@ -67,22 +112,22 @@ public struct SearchView: View {
     private var results: some View {
         if !performers.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
-                SectionHeader("Performers")
+                SectionHeader("Performers", count: performers.count)
                 ScrollView(.horizontal) {
-                    HStack(spacing: 16) { ForEach(performers) { PerformerBubble(performer: $0) } }.padding(.horizontal, Theme.Space.page)
+                    HStack(spacing: 16) { ForEach(performers) { PerformerBubble(performer: $0, diameter: 84).pulseScrollReveal() } }.padding(.horizontal, Theme.Space.page)
                 }
                 .scrollIndicators(.hidden)
             }
         }
         if !studios.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
-                SectionHeader("Studios")
+                SectionHeader("Studios", count: studios.count)
                 LazyVStack(spacing: 10) { ForEach(studios.prefix(4)) { StudioCard(studio: $0) } }.padding(.horizontal, Theme.Space.page)
             }
         }
         if !videos.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
-                SectionHeader("Videos")
+                SectionHeader("Videos", count: videos.count)
                 LazyVStack(spacing: 10) { ForEach(videos) { SceneRow(scene: $0) } }.padding(.horizontal, Theme.Space.page)
             }
         }

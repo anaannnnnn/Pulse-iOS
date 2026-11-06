@@ -3,7 +3,7 @@ import SwiftUI
 import PulseCore
 import PulseDesign
 
-/// Round portrait with a violet story ring.
+/// Round portrait with a mint story ring.
 struct PerformerBubble: View {
     let performer: Performer
     var diameter: CGFloat = 78
@@ -20,7 +20,7 @@ struct PerformerBubble: View {
                     .overlay(alignment: .topTrailing) {
                         if hub.isFavorite(performer) {
                             Image(systemName: "heart.fill").font(.system(size: 10, weight: .bold))
-                                .foregroundStyle(.white).padding(5).background(Theme.accent, in: Circle())
+                                .foregroundStyle(.white).padding(5).background(Theme.ember, in: Circle())
                         }
                     }
                 Text(performer.name)
@@ -48,19 +48,19 @@ struct PerformerCard: View {
                     .overlay(alignment: .bottom) { LinearGradient(colors: [.clear, .black.opacity(0.7)], startPoint: .center, endPoint: .bottom) }
                     .overlay(alignment: .bottomLeading) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(performer.name).font(PulseFont.label(.subheadline)).fontWeight(.bold).foregroundStyle(.white).lineLimit(1)
+                            Text(performer.name).font(PulseFont.display(15, relativeTo: .subheadline)).foregroundStyle(.white).lineLimit(1)
                             Text("\(performer.sceneCount) scenes").font(.caption2).foregroundStyle(.white.opacity(0.8))
                         }
                         .padding(12)
                     }
                     .overlay(alignment: .topTrailing) {
                         if hub.isFavorite(performer) {
-                            Image(systemName: "heart.fill").font(.caption.weight(.bold)).foregroundStyle(Theme.accentSoft)
+                            Image(systemName: "heart.fill").font(.caption.weight(.bold)).foregroundStyle(Theme.ember)
                                 .padding(7).pulseGlass(in: Circle()).padding(8)
                         }
                     }
                     .clipShape(.rect(cornerRadius: Theme.Radius.card, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous).strokeBorder(Theme.line))
+                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous).strokeBorder(Theme.rim))
             }
         }
         .buttonStyle(.pressable)
@@ -89,8 +89,8 @@ struct StudioCard: View {
                 Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(Theme.textTertiary)
             }
             .padding(12)
-            .background(Theme.surface.opacity(0.7), in: .rect(cornerRadius: 18, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Theme.line))
+            .background(.ultraThinMaterial.opacity(0.6), in: .rect(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Theme.rim, lineWidth: 0.8))
         }
         .buttonStyle(.pressable)
     }

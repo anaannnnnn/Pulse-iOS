@@ -11,7 +11,7 @@ public struct PulseRootView: View {
     @State private var coordinator = PlayerCoordinator()
     @Environment(\.scenePhase) private var scenePhase
 
-    public init() {}
+    public init() { PulseAppearance.apply() }
 
     public var body: some View {
         ZStack {

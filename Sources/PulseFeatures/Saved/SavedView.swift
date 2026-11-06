@@ -17,14 +17,13 @@ public struct SavedView: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 18) {
-                Picker("Section", selection: $section) {
-                    ForEach(SavedSection.allCases) { Text(LocalizedStringKey($0.rawValue)).tag($0) }
-                }
-                .pickerStyle(.segmented)
+                PulseSegmented(selection: $section, options: SavedSection.allCases.map {
+                    (value: $0, title: LocalizedStringKey($0.rawValue), icon: nil as String?)
+                })
                 .padding(.horizontal, Theme.Space.page)
                 content
             }
-            .padding(.bottom, 120)
+            .padding(.bottom, 24)
         }
         .scrollIndicators(.hidden)
         .pulseScreenBackground(intensity: 0.5)

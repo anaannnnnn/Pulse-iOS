@@ -21,8 +21,9 @@ private struct GlassModifier<S: Shape>: ViewModifier {
     private func fallback(_ content: Content) -> some View {
         content
             .background(.ultraThinMaterial, in: shape)
+            .background(Color.white.opacity(0.035), in: shape)
             .background((tint ?? .clear).opacity(0.18), in: shape)
-            .overlay(shape.stroke(Theme.lineStrong, lineWidth: 1))
+            .overlay(shape.strokeBorder(Theme.rim, lineWidth: 1))
     }
 }
 

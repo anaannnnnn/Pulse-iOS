@@ -19,10 +19,9 @@ public struct PeopleView: View {
         @Bindable var people = stores.people
         ScrollView {
             VStack(spacing: 18) {
-                Picker("Browse", selection: $mode) {
-                    ForEach(Mode.allCases) { Text(LocalizedStringKey($0.rawValue)).tag($0) }
-                }
-                .pickerStyle(.segmented)
+                PulseSegmented(selection: $mode, options: Mode.allCases.map {
+                    (value: $0, title: LocalizedStringKey($0.rawValue), icon: nil as String?)
+                })
                 .padding(.horizontal, Theme.Space.page)
 
                 switch mode {
@@ -30,7 +29,7 @@ public struct PeopleView: View {
                 case .studios: studios
                 }
             }
-            .padding(.bottom, 120)
+            .padding(.bottom, 24)
         }
         .scrollIndicators(.hidden)
         .pulseScreenBackground(intensity: 0.5)

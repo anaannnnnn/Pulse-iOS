@@ -21,7 +21,7 @@ public struct LibraryView: View {
                 results
             }
             .padding(.horizontal, Theme.Space.page)
-            .padding(.bottom, 120)
+            .padding(.bottom, 24)
         }
         .scrollIndicators(.hidden)
         .pulseScreenBackground(intensity: 0.5)

@@ -18,15 +18,17 @@ struct SignInView: View {
 
     private enum Field { case email, password, server }
 
+    @State private var appeared = false
     private var busy: Bool { session.phase == .signingIn }
 
     var body: some View {
         ScrollView {
             VStack(spacing: 26) {
-                Spacer(minLength: 36)
-                PulseMark(size: 44)
+                Spacer(minLength: 56)
+                PulseMark(size: 40)
+                    .scaleEffect(appeared ? 1 : 0.7).opacity(appeared ? 1 : 0)
                 VStack(spacing: 8) {
-                    Text("Sign in").font(PulseFont.display(24, relativeTo: .title)).foregroundStyle(Theme.text)
+                    Text("Welcome back").font(PulseFont.display(34, relativeTo: .largeTitle, weight: .heavy)).tracking(-0.6).foregroundStyle(Theme.text)
                     Text(session.isDemo ? "Demo library" : "Use the same account as your Pulse server.")
                         .font(.subheadline).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
                 }
@@ -61,7 +63,7 @@ struct SignInView: View {
                             .accessibilityAddTraits(.updatesFrequently)
                     }
                     Button { Task { await signIn() } } label: {
-                        if busy { ProgressView().tint(.white).frame(maxWidth: .infinity) }
+                        if busy { ProgressView().tint(Theme.onAccent).frame(maxWidth: .infinity) }
                         else { Text("Sign in").frame(maxWidth: .infinity) }
                     }
                     .buttonStyle(.pulsePrimary)
@@ -76,7 +78,11 @@ struct SignInView: View {
                         .disabled(busy)
                     }
                 }
+                .padding(18)
+                .pulseGlass(in: RoundedRectangle(cornerRadius: 32, style: .continuous))
+                .pulseGlowBorder(RoundedRectangle(cornerRadius: 32, style: .continuous))
                 .frame(maxWidth: 420)
+                .offset(y: appeared ? 0 : 40).opacity(appeared ? 1 : 0)
 
                 Button("Explore the demo library") { session.enterDemo() }
                     .font(.footnote).foregroundStyle(Theme.textSecondary).frame(minHeight: 44)
@@ -88,6 +94,7 @@ struct SignInView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .background { AuroraBackground() }
+        .onAppear { withAnimation(.spring(duration: 0.8, bounce: 0.25).delay(0.1)) { appeared = true } }
         .task {
             email = session.email
             serverText = session.usesCustomServer ? session.serverURL.absoluteString : ""
@@ -101,7 +108,7 @@ struct SignInView: View {
 
     private func field<Content: View>(systemImage: String, @ViewBuilder content: () -> Content) -> some View {
         HStack(spacing: 12) {
-            Image(systemName: systemImage).foregroundStyle(Theme.accentSoft).frame(width: 22)
+            Image(systemName: systemImage).foregroundStyle(Theme.accent).frame(width: 22)
             content()
         }
         .padding(.horizontal, 16).frame(minHeight: 54)

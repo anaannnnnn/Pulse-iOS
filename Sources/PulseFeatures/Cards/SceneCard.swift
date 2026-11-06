@@ -7,6 +7,8 @@ import PulseDesign
 struct SceneCard: View {
     let scene: Video
     var width: CGFloat?
+    /// Adds a centred play button (used by "Continue watching").
+    var showsPlay = false
     @Environment(FavoritesHub.self) private var hub
     @Environment(PlayerCoordinator.self) private var player
     @Environment(\.zoomNamespace) private var zoomNamespace
@@ -17,7 +19,7 @@ struct SceneCard: View {
                 artwork
                 VStack(alignment: .leading, spacing: 3) {
                     Text(scene.title)
-                        .font(PulseFont.label(.subheadline)).fontWeight(.semibold)
+                        .font(PulseFont.display(15, relativeTo: .subheadline, weight: .semibold))
                         .foregroundStyle(Theme.text)
                         .lineLimit(2, reservesSpace: false)
                     Text(subtitle)
@@ -44,6 +46,13 @@ struct SceneCard: View {
             .overlay(alignment: .bottom) {
                 LinearGradient(colors: [.clear, .black.opacity(0.65)], startPoint: .center, endPoint: .bottom).allowsHitTesting(false)
             }
+            .overlay {
+                if showsPlay {
+                    Image(systemName: "play.fill").font(.system(size: 18, weight: .bold)).foregroundStyle(Theme.onAccent)
+                        .frame(width: 52, height: 52).background(Theme.gradient, in: Circle())
+                        .shadow(color: Theme.accent.opacity(0.55), radius: 16)
+                }
+            }
             .overlay(alignment: .topLeading) {
                 if let label = scene.resolutionLabel, label == "4K" || label == "1440p" {
                     Chip(LocalizedStringKey(label), tint: Theme.accentSoft).padding(8)
@@ -53,7 +62,7 @@ struct SceneCard: View {
                 if hub.isFavorite(scene) {
                     Image(systemName: "heart.fill")
                         .font(.caption.weight(.bold))
-                        .foregroundStyle(Theme.accentSoft)
+                        .foregroundStyle(Theme.ember)
                         .padding(7)
                         .pulseGlass(in: Circle())
                         .padding(8)
@@ -74,14 +83,16 @@ struct SceneCard: View {
                 if let progress = scene.progress, !progress.completed, progress.fraction > 0 {
                     GeometryReader { proxy in
                         Capsule().fill(Theme.gradient)
-                            .frame(width: proxy.size.width * progress.fraction, height: 3)
+                            .frame(width: proxy.size.width * progress.fraction, height: 4)
+                            .shadow(color: Theme.accent.opacity(0.7), radius: 4)
                             .frame(maxHeight: .infinity, alignment: .bottom)
                     }
                     .allowsHitTesting(false)
                 }
             }
             .clipShape(.rect(cornerRadius: Theme.Radius.card, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous).strokeBorder(Theme.line, lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous).strokeBorder(Theme.rim, lineWidth: 1))
+            .shadow(color: .black.opacity(0.4), radius: 14, y: 8)
             .animation(.snappy, value: hub.isFavorite(scene))
     }
 
@@ -141,7 +152,7 @@ struct SceneRow: View {
                     .overlay { PulseArt(scene.poster ?? scene.thumb, seed: scene.id) }
                     .clipShape(.rect(cornerRadius: 14, style: .continuous))
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(scene.title).font(PulseFont.label(.subheadline)).fontWeight(.semibold).foregroundStyle(Theme.text).lineLimit(2)
+                    Text(scene.title).font(PulseFont.display(15, relativeTo: .subheadline, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
                     Text([scene.studio?.name, Format.runtime(scene.duration)].compactMap { $0 }.joined(separator: " · "))
                         .font(.caption).foregroundStyle(Theme.textSecondary).lineLimit(1)
                     if let p = scene.progress, !p.completed, p.fraction > 0 {
@@ -152,8 +163,8 @@ struct SceneRow: View {
                 Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(Theme.textTertiary)
             }
             .padding(10)
-            .background(Theme.surface.opacity(0.7), in: .rect(cornerRadius: 18, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Theme.line))
+            .background(.ultraThinMaterial.opacity(0.6), in: .rect(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Theme.rim, lineWidth: 0.8))
         }
         .buttonStyle(.pressable)
         .zoomSource(id: scene.id, in: zoomNamespace)

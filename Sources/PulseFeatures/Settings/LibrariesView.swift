@@ -20,7 +20,7 @@ struct LibrariesView: View {
                 behaviour(settings: $settings.settings.library)
             }
             .padding(Theme.Space.page)
-            .padding(.bottom, 100)
+            .padding(.bottom, 24)
         }
         .scrollIndicators(.hidden)
         .pulseScreenBackground(intensity: 0.5)
