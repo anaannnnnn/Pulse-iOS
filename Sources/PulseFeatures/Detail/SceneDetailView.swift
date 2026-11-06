@@ -41,7 +41,7 @@ struct SceneDetailView: View {
         }
         .scrollIndicators(.hidden)
         .ignoresSafeArea(edges: .top)
-        .background(Theme.bg)
+        .background { AmbientBackdrop(path: detail?.backdrop ?? current.poster ?? current.thumb, seed: current.id, strength: 0.45) }
         .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
         .toolbar { toolbarContent }
         .task { await store.load() }
@@ -57,7 +57,7 @@ struct SceneDetailView: View {
     // MARK: Sections
 
     private var hero: some View {
-        Color.clear.frame(height: 440)
+        Color.clear.frame(height: 520)
             .overlay { PulseArt(detail?.backdrop ?? current.poster ?? current.thumb, seed: current.id) }
             .overlay { Theme.scrim }
             .visualEffect { content, proxy in
@@ -71,13 +71,14 @@ struct SceneDetailView: View {
     private var titleBlock: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(current.title)
-                .font(PulseFont.display(26, relativeTo: .largeTitle))
+                .font(PulseFont.display(34, relativeTo: .largeTitle, weight: .heavy))
+                .tracking(-0.7)
                 .foregroundStyle(Theme.text)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 8) {
                 if let studio = current.studio {
                     NavigationLink(value: Route.studio(studio.id)) {
-                        Label(studio.name, systemImage: "building.2").font(.subheadline.weight(.semibold)).foregroundStyle(Theme.accentSoft)
+                        Label(studio.name, systemImage: "building.2").font(.subheadline.weight(.semibold)).foregroundStyle(Theme.accent)
                     }
                 }
                 if let year = current.year { Text(String(year)).font(.subheadline).foregroundStyle(Theme.textSecondary) }
@@ -108,14 +109,14 @@ struct SceneDetailView: View {
                     Image(systemName: stores.hub.isFavorite(current) ? "heart.fill" : "heart")
                         .symbolEffect(.bounce, value: stores.hub.isFavorite(current))
                 }
-                .buttonStyle(.pulseIcon)
+                .buttonStyle(.pulseIcon(isOn: stores.hub.isFavorite(current), tint: Theme.ember))
                 .accessibilityLabel(stores.hub.isFavorite(current) ? "Remove favourite" : "Add favourite")
 
                 Button { Task { await stores.hub.toggle(current, list: .watchlist) } } label: {
                     Image(systemName: stores.hub.isWatchlisted(current) ? "bookmark.fill" : "bookmark")
                         .symbolEffect(.bounce, value: stores.hub.isWatchlisted(current))
                 }
-                .buttonStyle(.pulseIcon)
+                .buttonStyle(.pulseIcon(isOn: stores.hub.isWatchlisted(current)))
                 .accessibilityLabel(stores.hub.isWatchlisted(current) ? "Remove from watchlist" : "Add to watchlist")
             }
         }
@@ -127,6 +128,9 @@ struct SceneDetailView: View {
             Text("Overview").font(PulseFont.title(.headline)).foregroundStyle(Theme.text)
             Text(text).font(.body).foregroundStyle(Theme.textSecondary).lineSpacing(3)
         }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .pulseGlass(in: RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 
     private var glance: some View {
@@ -181,7 +185,7 @@ struct SceneDetailView: View {
                 if let ext = detail?.tpdb?.url, let url = URL(string: ext) { LinkRow(label: "ThePornDB", url: url) }
                 if let ext = detail?.stashdb?.url, let url = URL(string: ext) { LinkRow(label: "StashDB", url: url) }
             }
-            .background(Theme.surface.opacity(0.7), in: .rect(cornerRadius: 16, style: .continuous))
+            .pulseGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous))
             HStack(spacing: 10) {
                 Button("Find match", systemImage: "magnifyingglass") { showMatch = true }.buttonStyle(.pulseGlass)
                 Button("Edit", systemImage: "pencil") { showEdit = true }.buttonStyle(.pulseGlass)
@@ -219,7 +223,7 @@ private struct GlanceTile: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: systemImage).font(.title3).foregroundStyle(Theme.accentSoft).frame(width: 28)
+            Image(systemName: systemImage).font(.title3).foregroundStyle(Theme.accent).frame(width: 28)
             VStack(alignment: .leading, spacing: 2) {
                 Text(label).font(.caption).foregroundStyle(Theme.textSecondary)
                 Text(value).font(PulseFont.label(.subheadline)).fontWeight(.semibold).foregroundStyle(Theme.text).lineLimit(1).minimumScaleFactor(0.8)
@@ -228,8 +232,7 @@ private struct GlanceTile: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading)
-        .background(Theme.surface.opacity(0.7), in: .rect(cornerRadius: 16, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Theme.line))
+        .pulseGlass(in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .accessibilityElement(children: .combine)
     }
 }

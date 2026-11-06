@@ -23,7 +23,7 @@ private struct GlassModifier<S: Shape>: ViewModifier {
             .background(.ultraThinMaterial, in: shape)
             .background(Color.white.opacity(0.035), in: shape)
             .background((tint ?? .clear).opacity(0.18), in: shape)
-            .overlay(shape.strokeBorder(Theme.rim, lineWidth: 1))
+            .overlay(shape.stroke(Theme.rim, lineWidth: 1))
     }
 }
 
