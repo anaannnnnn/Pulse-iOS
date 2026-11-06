@@ -1,0 +1,74 @@
+name: Unsigned IPA
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select newest Xcode
+        run: |
+          XC=$(ls -d /Applications/Xcode_26* 2>/dev/null | sort -V | tail -1 || true)
+          [ -n "$XC" ] || XC=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          echo "Using $XC"
+          sudo xcode-select -s "$XC"
+          xcodebuild -version
+
+      - name: Generate Xcode project
+        run: |
+          brew install xcodegen
+          scripts/ci-set-build-number.sh "${{ github.run_number }}"
+          scripts/generate-project.sh
+
+      - name: Archive without signing
+        run: |
+          set -euo pipefail
+          xcodebuild archive \
+            -project Pulse.xcodeproj -scheme Pulse -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/Pulse.xcarchive \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            | tail -60
+
+      - name: Package IPA
+        run: |
+          set -euo pipefail
+          mkdir -p site Payload
+          cp -R build/Pulse.xcarchive/Products/Applications/Pulse.app Payload/
+          zip -qry site/Pulse-unsigned.ipa Payload
+          {
+            echo '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+            echo '<title>Pulse unsigned IPA</title><h1>Pulse for iOS</h1>'
+            echo "<p>Build ${{ github.run_number }} (${{ github.sha }})</p>"
+            echo '<p><a href="Pulse-unsigned.ipa">Download Pulse-unsigned.ipa</a></p>'
+            echo '<p>Unsigned: sideload with AltStore or Sideloadly, or re-sign it yourself.</p>'
+          } > site/index.html
+          ls -lh site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
