@@ -5,6 +5,7 @@ import PulseCore
 /// Remote artwork with a stable gradient placeholder, fade-in, and optional privacy blur.
 public struct PulseArt: View {
     @Environment(\.pulseImageBase) private var base
+    @Environment(\.pulseMediaToken) private var token
     @Environment(\.pulseBlurArt) private var blur
     let path: String?
     let seed: Int
@@ -18,8 +19,9 @@ public struct PulseArt: View {
 
     private var url: URL? {
         guard let path, !path.isEmpty else { return nil }
-        if path.hasPrefix("http://") || path.hasPrefix("https://") { return URL(string: path) }
-        return base?.appendingAPI(path)
+        guard let base else { return URL(string: path) }
+        let resolved = path.hasPrefix("http://") || path.hasPrefix("https://") ? URL(string: path) : base.joiningServerPath(path)
+        return resolved?.addingSessionToken(token, forServer: base)
     }
 
     public var body: some View {

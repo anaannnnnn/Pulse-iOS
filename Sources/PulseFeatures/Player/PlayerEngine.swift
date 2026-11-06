@@ -69,7 +69,7 @@ final class PlayerEngine: NSObject, AVPictureInPictureControllerDelegate {
 
     // MARK: Loading
 
-    func load(url: URL, cookies: [HTTPCookie], startAt: Double, rate: Double, muted: Bool) {
+    func load(url: URL, cookies: [HTTPCookie], token: String?, startAt: Double, rate: Double, muted: Bool) {
         itemBag.removeAll()
         hasEnded = false
         isBuffering = true
@@ -77,8 +77,11 @@ final class PlayerEngine: NSObject, AVPictureInPictureControllerDelegate {
         self.rate = rate
         player.isMuted = muted
 
-        let options: [String: Any]? = cookies.isEmpty ? nil : [AVURLAssetHTTPCookiesKey: cookies]
-        let asset = AVURLAsset(url: url, options: options)
+        var options: [String: Any] = [:]
+        if !cookies.isEmpty { options[AVURLAssetHTTPCookiesKey] = cookies }
+        // Segments and sub-playlists do not inherit `?pt=`, so send the token as a header too.
+        if let token { options["AVURLAssetHTTPHeaderFieldsKey"] = ["Authorization": "Bearer \(token)"] }
+        let asset = AVURLAsset(url: url, options: options.isEmpty ? nil : options)
         let item = AVPlayerItem(asset: asset)
         item.preferredForwardBufferDuration = 0
         item.audioTimePitchAlgorithm = .timeDomain

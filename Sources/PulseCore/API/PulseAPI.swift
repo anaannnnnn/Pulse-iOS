@@ -3,6 +3,8 @@ import Foundation
 /// Everything the app needs from a Pulse server. `PulseClient` talks HTTP; `DemoClient` serves sample data.
 public protocol PulseAPI: Sendable {
     var baseURL: URL { get }
+    /// Session token for media URLs and player headers. Nil in demo mode.
+    var sessionToken: String? { get }
 
     // Session
     func health() async throws -> HealthInfo

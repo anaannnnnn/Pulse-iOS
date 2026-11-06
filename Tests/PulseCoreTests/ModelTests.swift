@@ -219,3 +219,20 @@ struct StoreTests {
         #expect(model.currentURL != nil)
     }
 }
+
+@Suite struct SessionTokenTests {
+    @Test func mediaURLsCarryTokenOnlyForServerHost() {
+        let server = URL(string: "https://pulse.example.com")!
+        let own = URL(string: "https://pulse.example.com/api/scenes/1/thumb?v=2")!
+        #expect(own.addingSessionToken("abc", forServer: server).absoluteString == "https://pulse.example.com/api/scenes/1/thumb?v=2&pt=abc")
+        let other = URL(string: "https://cdn.example.org/x.jpg")!
+        #expect(other.addingSessionToken("abc", forServer: server) == other)
+        #expect(own.addingSessionToken(nil, forServer: server) == own)
+    }
+
+    @Test func serverPathKeepsItsQuery() {
+        let base = URL(string: "https://pulse.example.com")!
+        #expect(base.joiningServerPath("/api/art/3?v=9")?.absoluteString == "https://pulse.example.com/api/art/3?v=9")
+        #expect(base.joiningServerPath("/api/art/3")?.absoluteString == "https://pulse.example.com/api/art/3")
+    }
+}

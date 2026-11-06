@@ -7,9 +7,14 @@ import FoundationNetworking
 public final class PulseClient: PulseAPI, @unchecked Sendable {
     public let baseURL: URL
     private let session: URLSession
+    private let tokenStore: SessionTokenStore
+    private let tokenLock = NSLock()
+    private var token: String?
 
-    public init(baseURL: URL, session: URLSession? = nil) {
+    public init(baseURL: URL, session: URLSession? = nil, tokenStore: SessionTokenStore? = nil) {
         self.baseURL = baseURL
+        self.tokenStore = tokenStore ?? SessionTokenStore(server: baseURL)
+        self.token = self.tokenStore.load()
         if let session {
             self.session = session
         } else {
@@ -22,9 +27,21 @@ public final class PulseClient: PulseAPI, @unchecked Sendable {
         }
     }
 
+    /// The session token, sent as a bearer header (the cookie alone is not reliable on every OS).
+    public var sessionToken: String? {
+        tokenLock.lock(); defer { tokenLock.unlock() }
+        return token
+    }
+
+    private func setToken(_ value: String?) {
+        tokenLock.lock(); token = value; tokenLock.unlock()
+        tokenStore.save(value)
+    }
+
+    /// Resolves a server path (or absolute URL) for images and video, adding the token the server accepts as `?pt=`.
     public func absoluteURL(_ path: String) -> URL? {
-        if path.hasPrefix("http://") || path.hasPrefix("https://") { return URL(string: path) }
-        return baseURL.appendingAPI(path)
+        let url = path.hasPrefix("http://") || path.hasPrefix("https://") ? URL(string: path) : baseURL.appendingAPI(path)
+        return url.map { $0.addingSessionToken(sessionToken, forServer: baseURL) }
     }
 
     // MARK: Core request plumbing
@@ -34,6 +51,7 @@ public final class PulseClient: PulseAPI, @unchecked Sendable {
         var req = URLRequest(url: url)
         req.httpMethod = method.rawValue
         req.setValue("application/json", forHTTPHeaderField: "Accept")
+        if let token = sessionToken { req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
         if let body {
             req.httpBody = body
             req.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -103,10 +121,16 @@ public final class PulseClient: PulseAPI, @unchecked Sendable {
 
     public func signIn(email: String, password: String) async throws {
         struct Body: Encodable { let email: String; let password: String }
-        try await sendVoid(.post, "/api/session/login", body: Body(email: email, password: password))
+        struct Reply: Decodable { let token: String? }
+        setToken(nil)
+        let reply: Reply = try await send(.post, "/api/session/login", body: Body(email: email, password: password))
+        setToken(reply.token)
     }
 
-    public func signOut() async throws { try await sendVoid(.post, "/api/session/lock", body: EmptyBody()) }
+    public func signOut() async throws {
+        defer { setToken(nil) }
+        try await sendVoid(.post, "/api/session/lock", body: EmptyBody())
+    }
 
     public func changePassword(current: String, new: String) async throws {
         struct Body: Encodable { let password: String; let currentPassword: String }
@@ -182,7 +206,9 @@ public final class PulseClient: PulseAPI, @unchecked Sendable {
 
     public func subtitleCues(for track: SubtitleTrack) async throws -> [SubtitleCue] {
         guard let url = absoluteURL(track.url) else { throw PulseError.invalidServerURL }
-        let data = try await perform(URLRequest(url: url))
+        var subtitleRequest = URLRequest(url: url)
+        if let token = sessionToken { subtitleRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
+        let data = try await perform(subtitleRequest)
         return WebVTT.parse(String(decoding: data, as: UTF8.self))
     }
 

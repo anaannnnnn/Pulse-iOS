@@ -25,6 +25,7 @@ public struct PulseRootView: View {
         .environment(session)
         .environment(coordinator)
         .environment(\.pulseImageBase, session.api.baseURL)
+        .environment(\.pulseMediaToken, session.api.sessionToken)
         .environment(\.pulseBlurArt, stores?.settings.settings.blurThumbnails ?? false)
         .preferredColorScheme(.dark)
         .tint(Theme.accent)
@@ -53,6 +54,7 @@ public struct PulseRootView: View {
             if let stores {
                 MainTabView()
                     .environment(stores)
+                    .environment(stores.hub)
             } else {
                 SplashView()
             }

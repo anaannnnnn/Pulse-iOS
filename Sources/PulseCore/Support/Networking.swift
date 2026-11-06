@@ -21,6 +21,23 @@ enum JSON {
 }
 
 extension URL {
+    /// Joins a server-relative path that may already carry a query string (`/api/art/3?v=2`).
+    public func joiningServerPath(_ path: String) -> URL? {
+        guard let q = path.firstIndex(of: "?") else { return appendingAPI(path) }
+        let items = URLComponents(string: String(path[q...]))?.queryItems ?? []
+        return appendingAPI(String(path[..<q]), query: items)
+    }
+
+    /// Adds `pt=<token>` for requests that cannot carry headers (images, video). Only for the Pulse server's own host.
+    public func addingSessionToken(_ token: String?, forServer server: URL) -> URL {
+        guard let token, host == server.host, var parts = URLComponents(url: self, resolvingAgainstBaseURL: false) else { return self }
+        var items = parts.queryItems ?? []
+        items.removeAll { $0.name == "pt" }
+        items.append(URLQueryItem(name: "pt", value: token))
+        parts.queryItems = items
+        return parts.url ?? self
+    }
+
     /// Joins an `/api/...` path (with optional query) onto a server base URL.
     public func appendingAPI(_ path: String, query: [URLQueryItem] = []) -> URL? {
         guard var parts = URLComponents(url: self, resolvingAgainstBaseURL: false) else { return nil }

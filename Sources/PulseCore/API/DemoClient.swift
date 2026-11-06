@@ -66,6 +66,7 @@ public actor DemoStore {
 
 public final class DemoClient: PulseAPI, Sendable {
     public let baseURL = URL(string: "https://demo.pulse.local")!
+    public let sessionToken: String? = nil
     private let store = DemoStore()
     private static let sampleStream = "https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8"
 

@@ -88,7 +88,7 @@ struct PlayerView: View {
         guard let url = model.currentURL else { return }
         let sameHost = url.host == stores.api.baseURL.host
         let cookies = sameHost ? (HTTPCookieStorage.shared.cookies(for: stores.api.baseURL) ?? []) : []
-        engine.load(url: url, cookies: cookies, startAt: startAt, rate: model.rate, muted: model.settings.muted)
+        engine.load(url: url, cookies: cookies, token: sameHost ? stores.api.sessionToken : nil, startAt: startAt, rate: model.rate, muted: model.settings.muted)
     }
 
     private func report(force: Bool = false) {

@@ -71,6 +71,7 @@ public enum PulseFont {
 extension EnvironmentValues {
     /// Server base URL used to resolve `/api/...` artwork paths.
     @Entry public var pulseImageBase: URL?
+    @Entry public var pulseMediaToken: String?
     /// Blur poster art (privacy setting).
     @Entry public var pulseBlurArt: Bool = false
 }
