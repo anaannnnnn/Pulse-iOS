@@ -180,7 +180,7 @@ struct AboutView: View {
             Section {
                 LabeledContent("App version", value: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0")
                 LabeledContent("Build", value: Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1")
-                LabeledContent("Server", value: session.isDemo ? "Demo" : (session.serverURL?.absoluteString ?? "—"))
+                LabeledContent("Server", value: session.isDemo ? "Demo" : (session.serverURL.absoluteString))
                 LabeledContent("Server version", value: health?.version ?? "—")
             }
         }
