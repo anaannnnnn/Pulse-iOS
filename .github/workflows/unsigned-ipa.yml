@@ -31,8 +31,8 @@ jobs:
       - name: Generate Xcode project
         run: |
           brew install xcodegen
-          scripts/ci-set-build-number.sh "${{ github.run_number }}"
-          scripts/generate-project.sh
+          bash scripts/ci-set-build-number.sh "${{ github.run_number }}"
+          bash scripts/generate-project.sh
 
       - name: Archive without signing
         run: |
