@@ -1,0 +1,162 @@
+# Pulse iOS: build, test, sign, package and (optionally) upload to TestFlight.
+#
+# One-time setup in Azure DevOps (Pipelines > Library > Variable group "pulse-ios-signing"):
+#   P12_PASSWORD            (secret)  password of the distribution certificate
+#   APPLE_TEAM_ID                     10-character team id
+#   PROVISIONING_PROFILE_NAME         name of the App Store profile for app.pulse.ios
+#   ASC_KEY_ID                        App Store Connect API key id        (only for TestFlight upload)
+#   ASC_ISSUER_ID                     App Store Connect issuer id         (only for TestFlight upload)
+# Secure files (Pipelines > Library > Secure files):
+#   distribution.p12                  Apple Distribution certificate + key
+#   Pulse_AppStore.mobileprovision    App Store provisioning profile
+#   AuthKey_<ASC_KEY_ID>.p8           App Store Connect API key             (only for TestFlight upload)
+
+trigger:
+  branches:
+    include: [main, release/*]
+  tags:
+    include: ['v*']
+pr:
+  branches:
+    include: [main]
+
+parameters:
+  - name: uploadToTestFlight
+    displayName: Upload the signed build to TestFlight
+    type: boolean
+    default: false
+
+variables:
+  - group: pulse-ios-signing
+  - name: bundleId
+    value: app.pulse.ios
+  - name: xcodeVersion
+    value: '26'            # any installed Xcode 16.4+ works; 26 enables Liquid Glass
+  - name: scheme
+    value: Pulse
+
+pool:
+  vmImage: macos-15
+
+stages:
+  - stage: Validate
+    displayName: Build and test
+    jobs:
+      - job: Package
+        displayName: Swift package tests
+        steps:
+          - script: |
+              set -euo pipefail
+              XC=$(ls -d /Applications/Xcode_${XCODE}* 2>/dev/null | sort -V | tail -1 || true)
+              [ -n "$XC" ] || XC=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+              echo "Using $XC"
+              sudo xcode-select -s "$XC"
+              xcodebuild -version
+            displayName: Select Xcode
+            env: { XCODE: $(xcodeVersion) }
+          - script: swift test --filter PulseCoreTests
+            displayName: Run PulseCore unit tests
+          - script: |
+              set -euo pipefail
+              xcodebuild build -scheme Pulse-Package \
+                -destination 'generic/platform=iOS Simulator' \
+                CODE_SIGNING_ALLOWED=NO | tail -40
+            displayName: Compile all Swift package targets for iOS
+          - task: PublishTestResults@2
+            condition: always()
+            inputs: { testResultsFormat: JUnit, testResultsFiles: '**/*.xunit', failTaskOnFailedTests: false }
+
+  - stage: Archive
+    displayName: Sign and package
+    dependsOn: Validate
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    jobs:
+      - job: Ipa
+        displayName: Build signed IPA
+        timeoutInMinutes: 60
+        steps:
+          - script: |
+              set -euo pipefail
+              XC=$(ls -d /Applications/Xcode_${XCODE}* 2>/dev/null | sort -V | tail -1 || true)
+              [ -n "$XC" ] || XC=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+              sudo xcode-select -s "$XC"
+              brew install xcodegen
+            displayName: Select Xcode and install XcodeGen
+            env: { XCODE: $(xcodeVersion) }
+
+          - script: |
+              set -euo pipefail
+              MARKETING="1.0.0"
+              if [[ "$(Build.SourceBranch)" == refs/tags/v* ]]; then MARKETING="${BUILD_SOURCEBRANCHNAME#v}"; fi
+              scripts/ci-set-build-number.sh "$(Build.BuildId)" "$MARKETING"
+              scripts/generate-project.sh
+            displayName: Stamp version and generate Xcode project
+
+          - task: DownloadSecureFile@1
+            name: distCert
+            inputs: { secureFile: distribution.p12 }
+          - task: DownloadSecureFile@1
+            name: profile
+            inputs: { secureFile: Pulse_AppStore.mobileprovision }
+
+          - task: InstallAppleCertificate@2
+            displayName: Install distribution certificate
+            inputs:
+              certSecureFile: distribution.p12
+              certPwd: $(P12_PASSWORD)
+              keychain: temp
+          - task: InstallAppleProvisioningProfile@1
+            displayName: Install provisioning profile
+            inputs:
+              provisioningProfileLocation: secureFiles
+              provProfileSecureFile: Pulse_AppStore.mobileprovision
+
+          - script: |
+              set -euo pipefail
+              mkdir -p build
+              xcodebuild archive \
+                -project Pulse.xcodeproj -scheme "$(scheme)" -configuration Release \
+                -destination 'generic/platform=iOS' \
+                -archivePath build/Pulse.xcarchive \
+                CODE_SIGN_STYLE=Manual \
+                DEVELOPMENT_TEAM="$(APPLE_TEAM_ID)" \
+                CODE_SIGN_IDENTITY="Apple Distribution" \
+                PROVISIONING_PROFILE_SPECIFIER="$(PROVISIONING_PROFILE_NAME)" \
+                | tail -60
+            displayName: Archive
+
+          - script: |
+              set -euo pipefail
+              scripts/render-export-options.sh "$(APPLE_TEAM_ID)" "$(bundleId)" "$(PROVISIONING_PROFILE_NAME)" > build/exportOptions.plist
+              xcodebuild -exportArchive \
+                -archivePath build/Pulse.xcarchive \
+                -exportOptionsPlist build/exportOptions.plist \
+                -exportPath build/ipa | tail -30
+              ls -lh build/ipa
+            displayName: Export IPA
+
+          - task: CopyFiles@2
+            inputs:
+              SourceFolder: build
+              Contents: |
+                ipa/*.ipa
+                Pulse.xcarchive/dSYMs/**
+              TargetFolder: $(Build.ArtifactStagingDirectory)
+          - task: PublishBuildArtifacts@1
+            displayName: Publish IPA
+            inputs:
+              PathtoPublish: $(Build.ArtifactStagingDirectory)
+              ArtifactName: Pulse-ios
+
+          - ${{ if eq(parameters.uploadToTestFlight, true) }}:
+              - task: DownloadSecureFile@1
+                name: ascKey
+                inputs: { secureFile: AuthKey_$(ASC_KEY_ID).p8 }
+              - script: |
+                  set -euo pipefail
+                  mkdir -p ~/.appstoreconnect/private_keys
+                  cp "$(ascKey.secureFilePath)" ~/.appstoreconnect/private_keys/AuthKey_$(ASC_KEY_ID).p8
+                  xcrun altool --upload-app --type ios \
+                    --file build/ipa/Pulse.ipa \
+                    --apiKey "$(ASC_KEY_ID)" --apiIssuer "$(ASC_ISSUER_ID)"
+                displayName: Upload to TestFlight
