@@ -7,10 +7,13 @@ public struct PosterArt: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let seed: Int
     var animated: Bool
+    var lite: Bool
 
-    public init(seed: Int, animated: Bool = false) {
+    /// `lite` skips the mesh and grain: gradients only, for walls with dozens of tiles.
+    public init(seed: Int, animated: Bool = false, lite: Bool = false) {
         self.seed = seed
         self.animated = animated
+        self.lite = lite
     }
 
     private struct Palette {
@@ -38,6 +41,21 @@ public struct PosterArt: View {
     public var body: some View {
         let p = Self.palettes[abs(seed) % Self.palettes.count]
         let still = reduceMotion || !animated
+        if lite { liteBody(p) } else { fullBody(p, still: still) }
+    }
+
+    private func liteBody(_ p: Palette) -> some View {
+        ZStack {
+            LinearGradient(colors: [color(p.shadow), color(p.deep), color(p.mid)],
+                           startPoint: unit(2) > 0.5 ? .topLeading : .topTrailing, endPoint: .bottom)
+            bloom(p)
+            RadialGradient(colors: [.clear, .black.opacity(0.6)], center: .center, startRadius: 20, endRadius: 200)
+        }
+        .saturation(0.82)
+        .accessibilityHidden(true)
+    }
+
+    private func fullBody(_ p: Palette, still: Bool) -> some View {
         ZStack {
             if still {
                 mesh(p, t: 0)
@@ -133,7 +151,6 @@ public struct PosterWall: View {
                     let direction: Double = column.isMultiple(of: 2) ? -1 : 1
                     let travel = (t * speed).truncatingRemainder(dividingBy: Double(cycle))
                     stack(column: column)
-                        .drawingGroup()
                         .offset(y: direction < 0 ? -CGFloat(travel) - cycle : CGFloat(travel) - cycle * 2)
                 }
             }
@@ -152,8 +169,8 @@ public struct PosterWall: View {
 
     private func stack(column: Int) -> some View {
         VStack(spacing: gap) {
-            ForEach(0..<18, id: \.self) { row in
-                PosterArt(seed: column * 31 + (row % 6) * 7 + 3)
+            ForEach(0..<13, id: \.self) { row in
+                PosterArt(seed: column * 31 + (row % 6) * 7 + 3, lite: true)
                     .frame(width: tileWidth, height: tileHeight)
                     .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Theme.rim, lineWidth: 1))
