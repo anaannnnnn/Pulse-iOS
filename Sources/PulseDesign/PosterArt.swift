@@ -135,42 +135,47 @@ struct Grain: View {
 /// Slowly drifting wall of posters. Fills the background of the sign-in screen so it never sits on empty black.
 public struct PosterWall: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var drift = false
+
     public init() {}
 
-    private let tileWidth: CGFloat = 132
-    private let tileHeight: CGFloat = 196
+    private let tileWidth: CGFloat = 120
+    private let tileHeight: CGFloat = 180
     private let gap: CGFloat = 12
 
     public var body: some View {
-        let cycle = (tileHeight + gap) * 6
-        TimelineView(.animation(minimumInterval: 1.0 / 30, paused: reduceMotion)) { context in
-            let t = reduceMotion ? 0 : context.date.timeIntervalSinceReferenceDate
+        GeometryReader { proxy in
             HStack(alignment: .top, spacing: gap) {
                 ForEach(0..<5, id: \.self) { column in
-                    let speed = 10.0 + Double(column % 3) * 7
-                    let direction: Double = column.isMultiple(of: 2) ? -1 : 1
-                    let travel = (t * speed).truncatingRemainder(dividingBy: Double(cycle))
                     stack(column: column)
-                        .offset(y: direction < 0 ? -CGFloat(travel) - cycle : CGFloat(travel) - cycle * 2)
+                        .offset(y: baseOffset(column) + (drift ? travel(column) : 0))
                 }
             }
-            .frame(maxHeight: .infinity, alignment: .top)
+            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .top)
+            .rotationEffect(.degrees(-9))
+            .scaleEffect(1.3)
         }
-        .rotationEffect(.degrees(-10))
-        .scaleEffect(1.25)
-        .opacity(0.55)
+        .opacity(0.7)
         .overlay {
-            LinearGradient(colors: [Theme.bg.opacity(0.35), Theme.bg.opacity(0.78), Theme.bg], startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [Theme.bg.opacity(0.1), Theme.bg.opacity(0.7), Theme.bg], startPoint: .top, endPoint: .bottom)
         }
         .clipped()
         .ignoresSafeArea()
+        .allowsHitTesting(false)
         .accessibilityHidden(true)
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.linear(duration: 40).repeatForever(autoreverses: true)) { drift = true }
+        }
     }
+
+    private func baseOffset(_ column: Int) -> CGFloat { column.isMultiple(of: 2) ? -260 : -460 }
+    private func travel(_ column: Int) -> CGFloat { (column.isMultiple(of: 2) ? 1 : -1) * CGFloat(220 + column * 30) }
 
     private func stack(column: Int) -> some View {
         VStack(spacing: gap) {
-            ForEach(0..<13, id: \.self) { row in
-                PosterArt(seed: column * 31 + (row % 6) * 7 + 3, lite: true)
+            ForEach(0..<8, id: \.self) { row in
+                PosterArt(seed: column * 5 + row * 3 + 1, lite: true)
                     .frame(width: tileWidth, height: tileHeight)
                     .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Theme.rim, lineWidth: 1))
