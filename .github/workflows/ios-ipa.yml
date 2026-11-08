@@ -1,0 +1,52 @@
+name: Build unsigned iOS IPA
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Select Xcode
+        run: |
+          set -euo pipefail
+          xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$xcode"
+          xcodebuild -version
+
+      - name: Generate project
+        run: |
+          set -euo pipefail
+          brew install xcodegen
+          bash scripts/generate-project.sh
+          xcodebuild -resolvePackageDependencies -project Pulse.xcodeproj -scheme Pulse
+
+      - name: Archive without signing
+        run: |
+          set -euo pipefail
+          xcodebuild archive \
+            -project Pulse.xcodeproj -scheme Pulse -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$PWD/build/Pulse.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+
+      - name: Package unsigned IPA
+        run: |
+          set -euo pipefail
+          mkdir -p build/ipa/Payload
+          ditto build/Pulse.xcarchive/Products/Applications/Pulse.app build/ipa/Payload/Pulse.app
+          cd build/ipa
+          zip -qry Pulse-unsigned.ipa Payload
+          unzip -t Pulse-unsigned.ipa
+
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: Pulse-iOS-unsigned-ipa
+          path: build/ipa/Pulse-unsigned.ipa
+          if-no-files-found: error

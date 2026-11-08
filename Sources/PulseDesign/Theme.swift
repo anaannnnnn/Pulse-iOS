@@ -144,7 +144,7 @@ public enum PulseFont {
     }
 
     public static func serif(_ size: CGFloat, relativeTo style: Font.TextStyle = .title, italic: Bool = false) -> Font {
-        let font = Font.system(style, weight: .regular, design: .serif)
+        let font = Font.system(style, design: .serif, weight: .regular)
         return italic ? font.italic() : font
     }
 
