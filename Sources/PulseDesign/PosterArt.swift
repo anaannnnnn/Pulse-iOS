@@ -39,14 +39,19 @@ public struct PosterArt: View {
         let p = Self.palettes[abs(seed) % Self.palettes.count]
         let still = reduceMotion || !animated
         ZStack {
-            TimelineView(.animation(minimumInterval: 1.0 / 24, paused: still)) { context in
-                mesh(p, t: still ? 0 : context.date.timeIntervalSinceReferenceDate)
+            if still {
+                mesh(p, t: 0)
+            } else {
+                TimelineView(.animation(minimumInterval: 1.0 / 24)) { context in
+                    mesh(p, t: context.date.timeIntervalSinceReferenceDate)
+                }
             }
             bloom(p)
             streak
-            RadialGradient(colors: [.clear, .black.opacity(0.6)], center: .center, startRadius: 40, endRadius: 520)
+            RadialGradient(colors: [.clear, .black.opacity(0.7)], center: .center, startRadius: 30, endRadius: 460)
             Grain(seed: seed).blendMode(.overlay).opacity(0.5)
         }
+        .saturation(0.82)
         .clipped()
         .accessibilityHidden(true)
     }
@@ -70,7 +75,7 @@ public struct PosterArt: View {
     }
 
     private func bloom(_ p: Palette) -> some View {
-        RadialGradient(colors: [color(p.light).opacity(0.5), color(p.light).opacity(0)],
+        RadialGradient(colors: [color(p.light).opacity(0.34), color(p.light).opacity(0)],
                        center: UnitPoint(x: 0.15 + unit(3) * 0.7, y: 0.1 + unit(4) * 0.5),
                        startRadius: 0, endRadius: 320)
             .blendMode(.plusLighter)

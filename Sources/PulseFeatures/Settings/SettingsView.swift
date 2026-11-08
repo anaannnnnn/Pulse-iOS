@@ -42,6 +42,7 @@ public struct SettingsView: View {
             }
         }
         .scrollContentBackground(.hidden)
+        .environment(\.defaultMinListRowHeight, 40)
         .pulseScreenBackground(intensity: 0.5)
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.large)
@@ -55,13 +56,19 @@ public struct SettingsView: View {
 
     private func row(_ page: SettingsPage, _ title: LocalizedStringKey, _ symbol: String) -> some View {
         NavigationLink(value: Route.settings(page)) {
-            Label {
+            HStack(spacing: 14) {
+                Image(systemName: symbol)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 32, height: 32)
+                    .background(Theme.accent.opacity(0.35), in: .rect(cornerRadius: 9, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 9, style: .continuous).stroke(Theme.accentSoft.opacity(0.35), lineWidth: 0.5))
                 Text(title).foregroundStyle(Theme.text)
-            } icon: {
-                Image(systemName: symbol).foregroundStyle(Theme.accentSoft)
             }
-            .frame(minHeight: 44)
+            .frame(minHeight: 36)
         }
+        .listRowBackground(Color.white.opacity(0.06))
+        .listRowSeparatorTint(Color.white.opacity(0.08))
     }
 
     private var connectionCard: some View {

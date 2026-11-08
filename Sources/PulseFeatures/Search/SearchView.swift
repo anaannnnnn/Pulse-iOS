@@ -85,26 +85,27 @@ public struct SearchView: View {
 
     @ViewBuilder
     private var recentsSection: some View {
-        if recents.isEmpty {
-            EmptyStateView("Search your library", message: "Find videos by title, cast, studio or tag.", systemImage: "magnifyingglass")
-        } else {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Recent").font(PulseFont.title(.title3)).foregroundStyle(Theme.text)
-                    Spacer()
-                    Button("Clear") { recents = []; UserDefaults.standard.removeObject(forKey: "pulse.recentSearches") }
-                        .font(.footnote.weight(.semibold)).foregroundStyle(Theme.accent)
-                }
-                FlowLayout(spacing: 8) {
-                    ForEach(recents, id: \.self) { term in
-                        Button { text = term } label: {
-                            Label(term, systemImage: "clock.arrow.circlepath").font(.footnote.weight(.semibold)).foregroundStyle(Theme.text)
-                                .padding(.horizontal, 12).frame(minHeight: 36).pulseCapsuleGlass()
+        VStack(alignment: .leading, spacing: 28) {
+            if !recents.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Recent").font(PulseFont.title(.title3)).foregroundStyle(Theme.text)
+                        Spacer()
+                        Button("Clear") { recents = []; UserDefaults.standard.removeObject(forKey: "pulse.recentSearches") }
+                            .font(.footnote.weight(.semibold)).foregroundStyle(Theme.accent)
+                    }
+                    FlowLayout(spacing: 8) {
+                        ForEach(recents, id: \.self) { term in
+                            Button { text = term } label: {
+                                Label(term, systemImage: "clock.arrow.circlepath").font(.footnote.weight(.semibold)).foregroundStyle(Theme.text)
+                                    .padding(.horizontal, 12).frame(minHeight: 36).pulseCapsuleGlass()
+                            }
                         }
                     }
                 }
+                .padding(.horizontal, Theme.Space.page)
             }
-            .padding(.horizontal, Theme.Space.page)
+            BrowseTiles()
         }
     }
 
