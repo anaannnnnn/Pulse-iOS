@@ -6,6 +6,7 @@ import PulseDesign
 public struct HomeView: View {
     @Environment(StoreBundle.self) private var stores
     @Environment(PlayerCoordinator.self) private var player
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var heroIndex = 0
     @State private var size = CGSize(width: 390, height: 844)
 
@@ -13,7 +14,9 @@ public struct HomeView: View {
 
     /// Card width scales with the screen so layouts hold from iPhone SE to Pro Max.
     private var cardWidth: CGFloat { min(max(size.width * 0.62, 220), 340).rounded() }
-    private var heroHeight: CGFloat { min(max(size.height * 0.56, 420), 600).rounded() }
+    private var heroHeight: CGFloat {
+        min(max(size.height * 0.56, 420), 600).rounded() + (dynamicTypeSize.isAccessibilitySize ? 120 : 0)
+    }
 
     private var heroVideo: Video? {
         guard case .loaded(let feed) = stores.home.state, feed.hero.indices.contains(heroIndex) else { return nil }
@@ -21,19 +24,21 @@ public struct HomeView: View {
     }
 
     public var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: Theme.Space.section) {
-                content
+        ZStack(alignment: .top) {
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: Theme.Space.section) {
+                    content
+                }
+                .padding(.bottom, 28)
             }
-            .padding(.bottom, 28)
+            .scrollIndicators(.hidden)
+            .ignoresSafeArea(edges: .top)
+            .refreshable { await stores.home.load(force: true) }
+            header
         }
-        .scrollIndicators(.hidden)
-        .ignoresSafeArea(edges: .top)
         .onGeometryChange(for: CGSize.self, of: \.size) { size = $0 }
         .background { backdrop }
-        .overlay(alignment: .top) { header }
         .toolbar(.hidden, for: .navigationBar)
-        .refreshable { await stores.home.load(force: true) }
         .task { await stores.home.load() }
         .navigationDestination(for: Route.self) { RouteDestination(route: $0) }
     }
@@ -56,7 +61,7 @@ public struct HomeView: View {
                 .accessibilityLabel("Settings")
         }
         .padding(.horizontal, Theme.Space.page)
-        .padding(.top, 58)
+        .padding(.top, 8)
         .frame(maxWidth: .infinity)
         .background(alignment: .top) {
             LinearGradient(colors: [Theme.bg.opacity(0.65), .clear], startPoint: .top, endPoint: .bottom).frame(height: 150).ignoresSafeArea().allowsHitTesting(false)
@@ -81,8 +86,9 @@ public struct HomeView: View {
                 metrics
                 let rails = feed.rails.filter { !$0.items.isEmpty }
                 let featuredID = rails.first { $0.kind == .scenes && $0.id != "continue" }?.id
-                ForEach(rails) { rail in
+                ForEach(Array(rails.enumerated()), id: \.element.id) { index, rail in
                     RailView(rail: rail, style: style(for: rail, featuredID: featuredID), cardWidth: cardWidth, screenWidth: size.width)
+                        .pulseScrollReveal(delay: Double(min(index, 3)) * 0.06)
                 }
             }
         }
@@ -216,7 +222,8 @@ struct HomeSkeleton: View {
                 .padding(.horizontal, Theme.Space.page)
             }
         }
-        .accessibilityHidden(true)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Loading library")
     }
 }
 #endif

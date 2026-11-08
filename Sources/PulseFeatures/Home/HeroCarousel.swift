@@ -21,7 +21,8 @@ struct HeroCarousel: View {
                     HeroSlide(video: video, height: height)
                         .containerRelativeFrame(.horizontal)
                         .scrollTransition(.interactive, axis: .horizontal) { content, phase in
-                            content.opacity(1 - abs(phase.value) * 0.6).scaleEffect(1 - abs(phase.value) * 0.05)
+                            content.opacity(reduceMotion ? 1 : 1 - abs(phase.value) * 0.6)
+                                .scaleEffect(reduceMotion ? 1 : 1 - abs(phase.value) * 0.05)
                         }
                 }
             }
@@ -34,9 +35,9 @@ struct HeroCarousel: View {
         .frame(height: height)
         .overlay(alignment: .bottom) { pager }
         .sensoryFeedback(.selection, trigger: index)
-        .task(id: index) {
+        .task(id: "\(index)-\(reduceMotion)") {
             progress = 0
-            guard videos.count > 1, !reduceMotion else { return }
+            guard videos.count > 1, !reduceMotion else { progress = 1; return }
             withAnimation(.linear(duration: dwell)) { progress = 1 }
             try? await Task.sleep(for: .seconds(dwell))
             guard !Task.isCancelled else { return }
@@ -45,7 +46,7 @@ struct HeroCarousel: View {
         .visualEffect { content, proxy in
             // Pulling down stretches the picture instead of exposing a gap.
             let pull = max(proxy.frame(in: .scrollView(axis: .vertical)).minY, 0)
-            return content.scaleEffect(1 + pull / 700, anchor: .bottom)
+            return content.scaleEffect(reduceMotion ? 1 : 1 + pull / 700, anchor: .bottom)
         }
     }
 
@@ -64,7 +65,7 @@ struct HeroCarousel: View {
                         }
                 }
             }
-            .animation(Theme.glide, value: index)
+            .animation(reduceMotion ? nil : Theme.glide, value: index)
             .padding(.bottom, 8)
             .accessibilityHidden(true)
         }
@@ -76,6 +77,8 @@ private struct HeroSlide: View {
     let height: CGFloat
     @Environment(PlayerCoordinator.self) private var player
     @Environment(FavoritesHub.self) private var hub
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var appeared = false
     @State private var drift = false
 
@@ -94,10 +97,10 @@ private struct HeroSlide: View {
                     }
                 }
                 Text(video.title)
-                    .font(.system(size: 30, weight: .bold))
+                    .font(.largeTitle.bold())
                     .tracking(-0.4)
                     .foregroundStyle(.white)
-                    .lineLimit(2)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? 3 : 2)
                     .shadow(color: .black.opacity(0.35), radius: 10, y: 2)
                     .blur(radius: appeared ? 0 : 12)
                     .scaleEffect(appeared ? 1 : 1.08, anchor: .leading)
@@ -113,9 +116,14 @@ private struct HeroSlide: View {
         }
         .frame(height: height)
         .clipped()
-        .onAppear {
-            withAnimation(.smooth(duration: 0.9).delay(0.1)) { appeared = true }
-            withAnimation(.easeInOut(duration: 18).repeatForever(autoreverses: true)) { drift = true }
+        .task(id: reduceMotion) {
+            if reduceMotion {
+                appeared = true
+                drift = false
+            } else {
+                withAnimation(Theme.entrance.delay(0.1)) { appeared = true }
+                withAnimation(.easeInOut(duration: 18).repeatForever(autoreverses: true)) { drift = true }
+            }
         }
     }
 
@@ -123,30 +131,44 @@ private struct HeroSlide: View {
         PulseArt(video.poster ?? video.thumb, seed: video.id)
             .frame(height: height)
             .visualEffect { content, proxy in
-                content.offset(x: -proxy.frame(in: .scrollView(axis: .horizontal)).minX * 0.25)
+                content.offset(x: reduceMotion ? 0 : -proxy.frame(in: .scrollView(axis: .horizontal)).minX * 0.25)
             }
             .scaleEffect(drift ? 1.22 : 1.08)
     }
 
     private var actions: some View {
         PulseGlassGroup(spacing: 12) {
-            HStack(spacing: 12) {
-                Button { player.play(video) } label: {
-                    Label(video.isInProgress ? "Resume" : "Play", systemImage: "play.fill")
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 12) { playButton; detailsButton; favoriteButton }
+                VStack(alignment: .leading, spacing: 8) {
+                    playButton
+                    HStack(spacing: 12) { detailsButton; favoriteButton }
                 }
-                .buttonStyle(.pulsePrimary)
-                NavigationLink(value: Route.scene(video)) {
-                    Label("Details", systemImage: "info.circle")
-                }
-                .buttonStyle(.pulseGlass)
-                Button { Task { await hub.toggle(video) } } label: {
-                    Image(systemName: hub.isFavorite(video) ? "heart.fill" : "heart")
-                        .symbolEffect(.bounce, value: hub.isFavorite(video))
-                }
-                .buttonStyle(.pulseIcon(isOn: hub.isFavorite(video), tint: Theme.ember))
-                .accessibilityLabel(hub.isFavorite(video) ? "Remove favourite" : "Favourite")
             }
         }
+    }
+
+    private var playButton: some View {
+        Button { player.play(video) } label: {
+            Label(video.isInProgress ? "Resume" : "Play", systemImage: "play.fill")
+        }
+        .buttonStyle(.pulsePrimary)
+    }
+
+    private var detailsButton: some View {
+        NavigationLink(value: Route.scene(video)) {
+            Label("Details", systemImage: "info.circle")
+        }
+        .buttonStyle(.pulseGlass)
+    }
+
+    private var favoriteButton: some View {
+        Button { Task { await hub.toggle(video) } } label: {
+            Image(systemName: hub.isFavorite(video) ? "heart.fill" : "heart")
+                .symbolEffect(.bounce, value: hub.isFavorite(video))
+        }
+        .buttonStyle(.pulseIcon(isOn: hub.isFavorite(video), tint: Theme.ember))
+        .accessibilityLabel(hub.isFavorite(video) ? "Remove favourite" : "Favourite")
     }
 
     private var metaLine: String {
