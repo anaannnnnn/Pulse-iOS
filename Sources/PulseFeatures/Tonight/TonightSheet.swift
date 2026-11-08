@@ -34,12 +34,13 @@ struct TonightSheet: View {
                         HStack(spacing: 10) {
                             ForEach(Length.allCases) { option in
                                 Button(LocalizedStringKey(option.rawValue)) { length = option }
-                                    .buttonStyle(.pulseGlass(tint: length == option ? Theme.accent : nil))
+                                    .buttonStyle(.pulseGlass(tint: length == option ? Theme.accent.opacity(0.4) : nil))
                                     .accessibilityAddTraits(length == option ? .isSelected : [])
                             }
                         }
                     }
                     .scrollIndicators(.hidden)
+                    .scrollClipDisabled()
 
                     if loading {
                         ProgressView().frame(maxWidth: .infinity).padding(.top, 40)
@@ -57,14 +58,13 @@ struct TonightSheet: View {
                 .padding(Theme.Space.page)
             }
             .scrollContentBackground(.hidden)
-            .background(Theme.bg)
             .navigationTitle("Tonight")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
             .task(id: length) { await load() }
         }
         .presentationDetents([.medium, .large])
-        .presentationBackground(.ultraThinMaterial)
+        .presentationBackground { AuroraBackground(intensity: 0.9) }
     }
 
     private func load() async {
@@ -88,7 +88,7 @@ private struct TonightRow: View {
             PulseArt(video.poster ?? video.thumb, seed: video.id)
                 .frame(width: 128, height: 80)
                 .clipShape(.rect(cornerRadius: 14, style: .continuous))
-                .overlay { Image(systemName: "play.fill").foregroundStyle(.white).padding(10).background(.black.opacity(0.4), in: Circle()) }
+                .overlay { Image(systemName: "play.fill").foregroundStyle(.white).frame(width: 36, height: 36).pulseGlass(in: Circle()) }
             VStack(alignment: .leading, spacing: 4) {
                 Text(video.title).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text).lineLimit(2)
                 Text([video.studio?.name, Format.runtime(video.duration)].compactMap { $0 }.joined(separator: " · "))
@@ -97,7 +97,7 @@ private struct TonightRow: View {
             Spacer(minLength: 0)
         }
         .padding(10)
-        .background(Theme.surface.opacity(0.7), in: .rect(cornerRadius: 18, style: .continuous))
+        .pulseGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .accessibilityElement(children: .combine)
         .accessibilityHint("Plays now")
     }

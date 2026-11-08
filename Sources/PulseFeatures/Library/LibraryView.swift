@@ -135,7 +135,7 @@ public struct LibraryView: View {
             .font(.caption.weight(.semibold))
             .foregroundStyle(Theme.text)
             .padding(.horizontal, 12).frame(minHeight: 34)
-            .pulseCapsuleGlass(tint: Theme.accent)
+            .pulseCapsuleGlass(tint: Theme.accent.opacity(0.4))
         }
         .accessibilityLabel("Remove filter \(title)")
     }
