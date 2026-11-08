@@ -15,7 +15,7 @@ public struct PulseRootView: View {
 
     public var body: some View {
         ZStack {
-            ImmersiveBackground()
+            Theme.bg.ignoresSafeArea()
             phaseContent
                 .transition(.opacity.combined(with: .scale(scale: 1.02)))
             if shieldVisible { PrivacyShield().transition(.opacity).zIndex(10) }
