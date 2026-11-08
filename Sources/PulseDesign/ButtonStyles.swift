@@ -4,6 +4,7 @@ import SwiftUI
 /// Main action: accent-tinted Liquid Glass with a white label. Never a solid fill.
 public struct PulsePrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init() {}
 
@@ -16,14 +17,15 @@ public struct PulsePrimaryButtonStyle: ButtonStyle {
             .pulseCapsuleGlass(tint: Theme.accent.opacity(0.5), interactive: true)
             .overlay { ShineSweep().clipShape(Capsule()) }
             .opacity(isEnabled ? 1 : 0.45)
-            .scaleEffect(configuration.isPressed ? 0.95 : 1)
-            .animation(Theme.tap, value: configuration.isPressed)
+            .scaleEffect(!reduceMotion && configuration.isPressed ? 0.95 : 1)
+            .animation(reduceMotion ? nil : Theme.tap, value: configuration.isPressed)
             .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.6), trigger: configuration.isPressed) { _, pressed in pressed }
     }
 }
 
 /// Neutral clear glass pill.
 public struct PulseGlassButtonStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var tint: Color?
 
     public init(tint: Color? = nil) { self.tint = tint }
@@ -35,14 +37,15 @@ public struct PulseGlassButtonStyle: ButtonStyle {
             .padding(.horizontal, 20)
             .frame(minHeight: 48)
             .pulseCapsuleGlass(tint: tint, interactive: true)
-            .scaleEffect(configuration.isPressed ? 0.95 : 1)
-            .animation(Theme.tap, value: configuration.isPressed)
+            .scaleEffect(!reduceMotion && configuration.isPressed ? 0.95 : 1)
+            .animation(reduceMotion ? nil : Theme.tap, value: configuration.isPressed)
             .sensoryFeedback(.selection, trigger: configuration.isPressed) { _, pressed in pressed }
     }
 }
 
 /// Round glass button. `isOn` tints the glass and colours the symbol; it never fills solid.
 public struct PulseIconButtonStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var tint: Color?
     var isOn: Bool
 
@@ -55,22 +58,24 @@ public struct PulseIconButtonStyle: ButtonStyle {
             .foregroundStyle(isOn ? color : Theme.text)
             .frame(width: 44, height: 44)
             .pulseGlass(in: Circle(), tint: isOn ? color.opacity(0.28) : nil, interactive: true)
-            .scaleEffect(configuration.isPressed ? 0.9 : 1)
-            .animation(Theme.tap, value: configuration.isPressed)
-            .animation(Theme.tap, value: isOn)
+            .scaleEffect(!reduceMotion && configuration.isPressed ? 0.9 : 1)
+            .animation(reduceMotion ? nil : Theme.tap, value: configuration.isPressed)
+            .animation(reduceMotion ? nil : Theme.tap, value: isOn)
             .sensoryFeedback(.impact(flexibility: .rigid, intensity: 0.5), trigger: configuration.isPressed) { _, pressed in pressed }
     }
 }
 
 /// Press feedback for cards and rows: dips and dims a touch.
 public struct PressableStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     public init() {}
 
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 0.97 : 1)
-            .brightness(configuration.isPressed ? -0.04 : 0)
-            .animation(Theme.tap, value: configuration.isPressed)
+            .scaleEffect(!reduceMotion && configuration.isPressed ? 0.97 : 1)
+            .brightness(!reduceMotion && configuration.isPressed ? -0.04 : 0)
+            .animation(reduceMotion ? nil : Theme.tap, value: configuration.isPressed)
     }
 }
 

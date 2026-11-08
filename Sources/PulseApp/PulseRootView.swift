@@ -10,6 +10,7 @@ public struct PulseRootView: View {
     @State private var stores: StoreBundle?
     @State private var coordinator = PlayerCoordinator()
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init() { PulseAppearance.apply() }
 
@@ -17,11 +18,11 @@ public struct PulseRootView: View {
         ZStack {
             ImmersiveBackground()
             phaseContent
-                .transition(.opacity.combined(with: .scale(scale: 1.02)))
+                .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 1.02)))
             if shieldVisible { PrivacyShield().transition(.opacity).zIndex(10) }
         }
-        .animation(PulseMotion.gentleSpring, value: session.phase)
-        .animation(PulseMotion.quick, value: shieldVisible)
+        .animation(reduceMotion ? nil : PulseMotion.gentleSpring, value: session.phase)
+        .animation(reduceMotion ? nil : PulseMotion.quick, value: shieldVisible)
         .environment(session)
         .environment(coordinator)
         .environment(\.pulseImageBase, session.api.baseURL)

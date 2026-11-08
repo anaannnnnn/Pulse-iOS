@@ -16,16 +16,27 @@ public struct Shimmer: View {
         .clipped()
         .allowsHitTesting(false)
         .onAppear {
-            guard !reduceMotion else { return }
-            withAnimation(.linear(duration: 1.4).repeatForever(autoreverses: false)) { phase = 1 }
+            if !reduceMotion { startShimmer() }
         }
+        .onChange(of: reduceMotion) { _, isReduced in
+            if isReduced {
+                withAnimation(.none) { phase = -1 }
+            } else {
+                startShimmer()
+            }
+        }
+    }
+
+    private func startShimmer() {
+        withAnimation(.linear(duration: 1.4).repeatForever(autoreverses: false)) { phase = 1 }
     }
 }
 
-/// Circular progress with a mint gradient.
+/// Circular progress with the shared blue-violet gradient.
 public struct ProgressRing: View {
     let fraction: Double
     var lineWidth: CGFloat
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(_ fraction: Double, lineWidth: CGFloat = 3) {
         self.fraction = fraction
@@ -40,7 +51,7 @@ public struct ProgressRing: View {
                 .stroke(Theme.gradient, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
         }
-        .animation(.smooth(duration: 0.6), value: fraction)
+        .animation(reduceMotion ? nil : .smooth(duration: 0.6), value: fraction)
         .accessibilityElement()
         .accessibilityLabel("Progress")
         .accessibilityValue("\(Int(fraction * 100)) percent")
@@ -73,6 +84,7 @@ public struct Chip: View {
 /// Small count pill next to a heading ("Collections 8").
 public struct CountBadge: View {
     let value: Int
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(_ value: Int) { self.value = value }
 
@@ -84,7 +96,7 @@ public struct CountBadge: View {
             .padding(.horizontal, 9)
             .frame(minHeight: 24)
             .background(.white.opacity(0.12), in: Capsule())
-            .animation(Theme.tap, value: value)
+            .animation(reduceMotion ? nil : Theme.tap, value: value)
     }
 }
 
@@ -93,6 +105,7 @@ public struct PulseSegmented<Value: Hashable>: View {
     let options: [(value: Value, title: LocalizedStringKey, icon: String?)]
     @Binding var selection: Value
     @Namespace private var pill
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(selection: Binding<Value>, options: [(value: Value, title: LocalizedStringKey, icon: String?)]) {
         self._selection = selection
@@ -105,7 +118,7 @@ public struct PulseSegmented<Value: Hashable>: View {
                 let option = options[i]
                 let selected = option.value == selection
                 Button {
-                    withAnimation(Theme.glide) { selection = option.value }
+                    withAnimation(reduceMotion ? nil : Theme.glide) { selection = option.value }
                 } label: {
                     HStack(spacing: 6) {
                         if let icon = option.icon { Image(systemName: icon).font(.caption.weight(.bold)) }
@@ -224,6 +237,7 @@ public struct ErrorStateView: View {
 /// Transient message pill.
 public struct ToastModifier: ViewModifier {
     @Binding var message: String?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public func body(content: Content) -> some View {
         content.overlay(alignment: .bottom) {
@@ -234,15 +248,15 @@ public struct ToastModifier: ViewModifier {
                     .padding(.horizontal, 18).padding(.vertical, 12)
                     .pulseCapsuleGlass()
                     .padding(.bottom, 96)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
                     .task(id: text) {
                         try? await Task.sleep(for: .seconds(3))
-                        withAnimation(.smooth) { message = nil }
+                        withAnimation(reduceMotion ? nil : .smooth) { message = nil }
                     }
                     .accessibilityAddTraits(.isStaticText)
             }
         }
-        .animation(.smooth, value: message)
+        .animation(reduceMotion ? nil : .smooth, value: message)
         .sensoryFeedback(.warning, trigger: message) { _, new in new != nil }
     }
 }
@@ -252,28 +266,53 @@ public extension View {
 
     /// Cards fade, scale and sink slightly as they scroll in/out of view.
     func pulseScrollReveal() -> some View {
-        scrollTransition(.animated(.smooth).threshold(.visible(0.15))) { content, phase in
-            content
-                .opacity(phase.isIdentity ? 1 : 0.3)
-                .scaleEffect(phase.isIdentity ? 1 : 0.9)
-                .blur(radius: phase.isIdentity ? 0 : 3)
-        }
+        modifier(ScrollReveal())
     }
 
     /// Curved carousel: neighbours swing away on a Y axis and shrink, like the category cards in the references.
     func pulseCurvedCarousel(angle: Double = 24) -> some View {
-        scrollTransition(.interactive, axis: .horizontal) { content, phase in
-            content
-                .rotation3DEffect(.degrees(phase.value * -angle), axis: (x: 0, y: 1, z: 0), perspective: 0.55)
-                .scaleEffect(1 - abs(phase.value) * 0.1)
-                .offset(x: phase.value * -14)
-                .opacity(1 - abs(phase.value) * 0.35)
-        }
+        modifier(CurvedCarousel(angle: angle))
     }
 
-    /// Slowly rotating mint highlight around a shape's edge. Static under Reduce Motion.
+    /// Slowly rotating accent highlight around a shape's edge. Static under Reduce Motion.
     func pulseGlowBorder<S: InsettableShape>(_ shape: S, lineWidth: CGFloat = 1.4) -> some View {
         modifier(GlowBorder(shape: shape, lineWidth: lineWidth))
+    }
+}
+
+private struct ScrollReveal: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        if reduceMotion {
+            content
+        } else {
+            content.scrollTransition(.animated(.smooth).threshold(.visible(0.15))) { content, phase in
+                content
+                    .opacity(phase.isIdentity ? 1 : 0.3)
+                    .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                    .blur(radius: phase.isIdentity ? 0 : 3)
+            }
+        }
+    }
+}
+
+private struct CurvedCarousel: ViewModifier {
+    let angle: Double
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        if reduceMotion {
+            content
+        } else {
+            content.scrollTransition(.interactive, axis: .horizontal) { content, phase in
+                content
+                    .rotation3DEffect(.degrees(phase.value * -angle), axis: (x: 0, y: 1, z: 0), perspective: 0.55)
+                    .scaleEffect(1 - abs(phase.value) * 0.1)
+                    .offset(x: phase.value * -14)
+                    .opacity(1 - abs(phase.value) * 0.35)
+            }
+        }
     }
 }
 
@@ -300,6 +339,7 @@ public struct CountUpText: View {
     let value: Int
     var compact: Bool
     @State private var shown = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(_ value: Int, compact: Bool = false) {
         self.value = value
@@ -310,7 +350,7 @@ public struct CountUpText: View {
         Text(shown, format: compact ? .number.notation(.compactName) : .number)
             .contentTransition(.numericText(value: Double(shown)))
             .task(id: value) {
-                withAnimation(.smooth(duration: 1.1)) { shown = value }
+                withAnimation(reduceMotion ? nil : .smooth(duration: 1.1)) { shown = value }
             }
     }
 }

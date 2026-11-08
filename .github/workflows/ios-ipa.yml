@@ -3,6 +3,9 @@ name: Build unsigned IPA
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build Pulse unsigned IPA
@@ -17,28 +20,33 @@ jobs:
           xcodebuild -version
 
       - name: Install XcodeGen
-        run: |
-          brew update
-          brew install xcodegen
+        run: brew install xcodegen
 
       - name: Generate Xcode project
         run: xcodegen generate
 
+      - name: Test core package
+        run: swift test --filter PulseCoreTests
+
       - name: Archive without code signing
         run: |
+          mkdir -p build
           xcodebuild \
             -project Pulse.xcodeproj \
             -scheme Pulse \
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -archivePath build/Pulse.xcarchive \
+            -derivedDataPath build/DerivedData \
             archive \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY=""
+            CODE_SIGN_IDENTITY="" \
+            AD_HOC_CODE_SIGNING_ALLOWED=NO
 
       - name: Package unsigned IPA
         run: |
+          rm -rf Payload Pulse-unsigned.ipa
           mkdir -p Payload
           cp -R "build/Pulse.xcarchive/Products/Applications/Pulse.app" Payload/
           zip -qry Pulse-unsigned.ipa Payload

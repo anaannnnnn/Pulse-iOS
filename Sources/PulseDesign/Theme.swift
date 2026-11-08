@@ -60,7 +60,7 @@ public final class AccentStore: @unchecked Sendable {
     public private(set) var choice: AccentChoice
 
     private init() {
-        choice = UserDefaults.standard.string(forKey: Self.key).flatMap(AccentChoice.init(rawValue:)) ?? .jade
+        choice = UserDefaults.standard.string(forKey: Self.key).flatMap(AccentChoice.init(rawValue:)) ?? .violet
     }
 
     public func select(_ choice: AccentChoice) {
@@ -69,14 +69,14 @@ public final class AccentStore: @unchecked Sendable {
     }
 }
 
-/// Graphite Glass: ink-black surfaces, real Liquid Glass on top, one quiet accent.
+/// Cinematic midnight surfaces, real Liquid Glass on top, and a quiet blue-violet accent.
 public enum Theme {
-    public static let bg = Color(hex: 0x07080A)
-    public static let surface = Color(hex: 0x0E1013)
-    public static let raised = Color(hex: 0x14171B)
-    public static let elevated = Color(hex: 0x1C2025)
-    public static let line = Color.white.opacity(0.07)
-    public static let lineStrong = Color.white.opacity(0.14)
+    public static let bg = Color(hex: 0x080A13)
+    public static let surface = Color(hex: 0x101321)
+    public static let raised = Color(hex: 0x171B2D)
+    public static let elevated = Color(hex: 0x202640)
+    public static let line = Color.white.opacity(0.08)
+    public static let lineStrong = Color.white.opacity(0.16)
 
     public static var accent: Color { Color(hex: AccentStore.shared.choice.base) }
     public static var accentSoft: Color { Color(hex: AccentStore.shared.choice.soft) }
@@ -91,10 +91,14 @@ public enum Theme {
 
     public static let text = Color(hex: 0xF4F5F7)
     public static let textSecondary = Color(hex: 0xA1A7B0)
-    public static let textTertiary = Color(hex: 0x6B717B)
+    public static let textTertiary = Color(hex: 0x858B9B)
 
     public static var gradient: LinearGradient {
-        LinearGradient(colors: [accentSoft, accent, accentDeep], startPoint: .topLeading, endPoint: .bottomTrailing)
+        LinearGradient(
+            colors: [Color(hex: 0x7695FF), accent, Color(hex: 0xA08AF2)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
     }
     public static let scrim = LinearGradient(colors: [.clear, bg.opacity(0.45), bg.opacity(0.96)], startPoint: .top, endPoint: .bottom)
     /// Bright top-left to faint bottom-right rim for fallback glass.
@@ -136,14 +140,14 @@ public extension Color {
     }
 }
 
-/// System fonts only: SF Pro for UI and titles, New York for editorial moments.
+/// System fonts only: rounded SF for display, SF Pro for UI, and New York for editorial moments.
 public enum PulseFont {
     public static func display(_ size: CGFloat, relativeTo style: Font.TextStyle = .title, weight: Font.Weight = .bold) -> Font {
-        .system(size: size, weight: weight)
+        .system(size: size, weight: weight, design: .rounded, relativeTo: style)
     }
 
     public static func serif(_ size: CGFloat, relativeTo style: Font.TextStyle = .title, italic: Bool = false) -> Font {
-        let font = Font.system(size: size, weight: .regular, design: .serif)
+        let font = Font.system(size: size, weight: .regular, design: .serif, relativeTo: style)
         return italic ? font.italic() : font
     }
 
