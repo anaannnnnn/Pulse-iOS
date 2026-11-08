@@ -28,7 +28,7 @@ struct SignInView: View {
                 PulseMark(size: 40)
                     .scaleEffect(appeared ? 1 : 0.7).opacity(appeared ? 1 : 0)
                 VStack(spacing: 8) {
-                    Text("Welcome back").font(PulseFont.display(34, relativeTo: .largeTitle, weight: .heavy)).tracking(-0.6).foregroundStyle(Theme.text)
+                    Text("Welcome back").font(PulseFont.display(.largeTitle, weight: .heavy)).tracking(-0.6).foregroundStyle(Theme.text)
                     Text(session.isDemo ? "Demo library" : "Use the same account as your Pulse server.")
                         .font(.subheadline).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
                 }

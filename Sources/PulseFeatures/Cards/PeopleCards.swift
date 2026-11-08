@@ -48,7 +48,7 @@ struct PerformerCard: View {
                     .overlay(alignment: .bottom) { LinearGradient(colors: [.clear, .black.opacity(0.7)], startPoint: .center, endPoint: .bottom) }
                     .overlay(alignment: .bottomLeading) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(performer.name).font(PulseFont.display(15, relativeTo: .subheadline)).foregroundStyle(.white).lineLimit(1)
+                            Text(performer.name).font(PulseFont.display(.subheadline)).foregroundStyle(.white).lineLimit(1)
                             Text("\(performer.sceneCount) scenes").font(.caption2).foregroundStyle(.white.opacity(0.8))
                         }
                         .padding(12)
@@ -78,7 +78,7 @@ struct StudioCard: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.placeholder(seed: studio.id))
                     if studio.logo != nil { PulseArt(studio.logo, seed: studio.id, contentMode: .fit).padding(6) }
-                    else { Text(String(studio.name.prefix(1))).font(PulseFont.display(22)).foregroundStyle(.white.opacity(0.85)) }
+                    else { Text(String(studio.name.prefix(1))).font(PulseFont.display(.title2)).foregroundStyle(.white.opacity(0.85)) }
                 }
                 .frame(width: 56, height: 56)
                 VStack(alignment: .leading, spacing: 3) {

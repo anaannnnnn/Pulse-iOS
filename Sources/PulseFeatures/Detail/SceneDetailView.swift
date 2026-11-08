@@ -71,7 +71,7 @@ struct SceneDetailView: View {
     private var titleBlock: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(current.title)
-                .font(PulseFont.display(34, relativeTo: .largeTitle, weight: .heavy))
+                .font(PulseFont.display(.largeTitle, weight: .heavy))
                 .tracking(-0.7)
                 .foregroundStyle(Theme.text)
                 .fixedSize(horizontal: false, vertical: true)

@@ -139,11 +139,11 @@ public extension Color {
 
 /// System fonts only: SF Pro for UI and titles, New York for editorial moments.
 public enum PulseFont {
-    public static func display(_ size: CGFloat, relativeTo style: Font.TextStyle = .title, weight: Font.Weight = .bold) -> Font {
+    public static func display(_ style: Font.TextStyle = .title, weight: Font.Weight = .bold) -> Font {
         .system(style, weight: weight)
     }
 
-    public static func serif(_ size: CGFloat, relativeTo style: Font.TextStyle = .title, italic: Bool = false) -> Font {
+    public static func serif(_ style: Font.TextStyle = .title, italic: Bool = false) -> Font {
         let font = Font.system(style, design: .serif, weight: .regular)
         return italic ? font.italic() : font
     }
