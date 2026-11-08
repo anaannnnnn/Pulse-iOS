@@ -1,7 +1,7 @@
 # Pulse for iOS
 
 Native SwiftUI client for the Pulse personal streaming server (pCloud + TorBox library, ThePornDB / StashDB metadata).
-It speaks the server's `/api` contract (`docs/API.md` in the Pulse repo) and mirrors the web app's Violet Glass design.
+It speaks the server's `/api` contract (`docs/API.md` in the Pulse repo) and presents a cinematic Graphite Glass interface.
 
 * iOS 18+ (Liquid Glass automatically on iOS 26+ when built with Xcode 26)
 * Swift 6 package, no third-party dependencies
@@ -30,7 +30,7 @@ It speaks the server's `/api` contract (`docs/API.md` in the Pulse repo) and mir
 Package.swift
 Sources/
   PulseCore/      Models, PulseAPI protocol, HTTP client, demo client, @Observable stores (builds and tests on Linux)
-  PulseDesign/    Violet Glass tokens, glass modifiers, aurora, buttons, art, shared components
+  PulseDesign/    Midnight palette, glass surfaces, motion, artwork, buttons, shared components
   PulseFeatures/  Screens: Home, Library, Search, Detail, People, Saved, Tonight, Player, Settings, Auth
   PulseApp/       PulseRootView (phase routing, tabs, privacy shield). The only thing the app target imports
 App/              @main, Info.plist, asset catalog, privacy manifest
@@ -51,6 +51,18 @@ open Pulse.xcodeproj            # choose your team under Signing & Capabilities,
 Or open `Package.swift` in Xcode to work on the modules directly.
 
 On first launch sign in with your Pulse email and password. Under **Settings → Libraries** connect pCloud and TorBox. The server address is built in; **Server** under the sign-in form lets you point at your own copy.
+
+## Design and motion
+
+The shared `PulseDesign` system gives every screen a layered midnight background, restrained blue-violet accents, translucent glass surfaces, rounded display typography, and consistent spacing and corner radii. Shared cards, controls, empty states, progress indicators, and artwork keep Home, browsing, details, people, saved items, settings, sign-in, and playback visually cohesive without changing their navigation or data flow.
+
+Spring transitions, staggered entrances, press feedback, and shimmer loading treatments are centralized in `PulseMotion` and the design components. They honor the system's Reduce Motion setting; the visual treatment does not change the app's features or account behavior.
+
+## GitHub Actions unsigned IPA
+
+The **Build unsigned IPA** workflow can be run manually from **Actions → Build unsigned IPA → Run workflow**. It runs the core tests, installs XcodeGen, generates `Pulse.xcodeproj`, archives Release for generic iOS with code signing disabled, and publishes the `Pulse-unsigned-ipa` artifact. This workflow does not use Apple signing certificates or repository secrets.
+
+Open the completed workflow run and download **Pulse-unsigned-ipa** from its Artifacts section. The artifact contains `Pulse-unsigned.ipa`. **This IPA is unsigned and cannot be installed on a device as-is. Before device installation, sign it with your own Apple signing identity and a provisioning profile for the target device.**
 
 ## Tests
 

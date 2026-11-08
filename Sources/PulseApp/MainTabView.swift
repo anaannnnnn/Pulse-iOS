@@ -7,6 +7,7 @@ import PulseFeatures
 /// System tab bar: Liquid Glass on iOS 26 (it shrinks as you scroll), a standard bar before that.
 struct MainTabView: View {
     @Environment(PlayerCoordinator.self) private var coordinator
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         @Bindable var coordinator = self.coordinator
@@ -18,6 +19,7 @@ struct MainTabView: View {
             Tab(value: AppTab.search, role: .search) { TabStack { SearchView() } }
         }
         .tabBarMinimizeOnScroll()
+        .animation(reduceMotion ? nil : PulseMotion.gentleSpring, value: coordinator.tab)
         .sensoryFeedback(.selection, trigger: coordinator.tab)
         .fullScreenCover(item: $coordinator.scene) { video in
             PlayerContainer(video: video)

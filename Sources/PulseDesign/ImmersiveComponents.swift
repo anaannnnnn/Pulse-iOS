@@ -22,12 +22,12 @@ public struct ImmersiveSectionHeader: View {
         HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
-                    .font(.system(.title2, design: .rounded, weight: .bold))
-                    .foregroundStyle(.primary)
+                    .font(PulseFont.title(.title2))
+                    .foregroundStyle(Theme.text)
                 if let subtitle {
                     Text(subtitle)
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.textSecondary)
                 }
             }
             Spacer()
@@ -35,12 +35,12 @@ public struct ImmersiveSectionHeader: View {
                 Button(action: action) {
                     Text(actionTitle)
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.accent)
+                        .foregroundStyle(Theme.accentSoft)
                 }
                 .pulsePress()
             }
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, Theme.Space.page)
         .padding(.top, 8)
     }
 }
@@ -62,13 +62,8 @@ public struct ImmersiveMediaCard: View {
         VStack(alignment: .leading, spacing: 10) {
             ZStack(alignment: .bottomLeading) {
                 RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [Color.blue.opacity(0.28), Color.purple.opacity(0.22), Color.black.opacity(0.5)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                    .fill(Theme.gradient)
+                    .overlay(Color.black.opacity(0.42))
                     .frame(height: 210)
 
                 if let poster {
@@ -93,7 +88,7 @@ public struct ImmersiveMediaCard: View {
                     if let subtitle {
                         Text(subtitle)
                             .font(.caption)
-                            .foregroundStyle(.white.opacity(0.75))
+                            .foregroundStyle(.white.opacity(0.84))
                             .lineLimit(1)
                     }
                 }
@@ -127,11 +122,11 @@ public struct ImmersiveRatingPill: View {
             Text(text)
                 .font(.caption.weight(.semibold))
         }
-        .foregroundStyle(.white)
+        .foregroundStyle(Theme.text)
         .padding(.horizontal, 9)
         .padding(.vertical, 5)
-        .background(Capsule().fill(.black.opacity(0.42)))
-        .overlay(Capsule().strokeBorder(.white.opacity(0.12)))
+        .background(Capsule().fill(Theme.surface.opacity(0.9)))
+        .overlay(Capsule().strokeBorder(Theme.lineStrong))
     }
 }
 
@@ -148,13 +143,7 @@ public struct ImmersiveProgressBar: View {
                 Capsule()
                     .fill(.white.opacity(0.12))
                 Capsule()
-                    .fill(
-                        LinearGradient(
-                            colors: [Theme.accent, .purple],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
+                    .fill(Theme.gradient)
                     .frame(width: proxy.size.width * progress)
             }
         }
@@ -188,7 +177,7 @@ public struct ImmersiveEmptyState: View {
         VStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.system(size: 38, weight: .semibold))
-                .foregroundStyle(Theme.accent)
+                .foregroundStyle(Theme.accentSoft)
                 .immersiveGlow(Theme.accent)
 
             Text(title)
@@ -197,7 +186,7 @@ public struct ImmersiveEmptyState: View {
             if let message {
                 Text(message)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.textSecondary)
                     .multilineTextAlignment(.center)
             }
 
@@ -223,11 +212,7 @@ public struct ImmersiveSectionDivider: View {
     public var body: some View {
         Rectangle()
             .fill(
-                LinearGradient(
-                    colors: [.clear, .white.opacity(0.14), .clear],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
+                LinearGradient(colors: [.clear, Theme.lineStrong, .clear], startPoint: .leading, endPoint: .trailing)
             )
             .frame(height: 1)
             .padding(.vertical, 10)

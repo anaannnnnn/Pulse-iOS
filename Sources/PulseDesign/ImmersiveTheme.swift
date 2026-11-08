@@ -4,9 +4,9 @@ public struct ImmersiveBackground: View {
     let colors: [Color]
 
     public init(colors: [Color] = [
-        Color(red: 0.04, green: 0.05, blue: 0.08),
-        Color(red: 0.08, green: 0.09, blue: 0.16),
-        Color(red: 0.03, green: 0.04, blue: 0.07)
+        Theme.bg,
+        Color(hex: 0x11152A),
+        Color(hex: 0x090A16)
     ]) {
         self.colors = colors
     }
@@ -19,7 +19,7 @@ public struct ImmersiveBackground: View {
         )
         .overlay(
             RadialGradient(
-                colors: [.blue.opacity(0.16), .clear],
+                colors: [Color(hex: 0x617DFF).opacity(0.2), .clear],
                 center: .topTrailing,
                 startRadius: 20,
                 endRadius: 620
@@ -27,7 +27,7 @@ public struct ImmersiveBackground: View {
         )
         .overlay(
             RadialGradient(
-                colors: [.purple.opacity(0.12), .clear],
+                colors: [Color(hex: 0xA178EF).opacity(0.16), .clear],
                 center: .bottomLeading,
                 startRadius: 20,
                 endRadius: 540
@@ -46,16 +46,17 @@ public struct ImmersiveCard<Content: View>: View {
 
     public var body: some View {
         content
-            .padding(18)
+            .padding(Theme.Space.page)
             .background(
-                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
                     .fill(.ultraThinMaterial)
+                    .background(Theme.surface.opacity(0.58), in: RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 26, style: .continuous)
-                            .strokeBorder(.white.opacity(0.08), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
+                            .strokeBorder(Theme.rim.opacity(0.72), lineWidth: 1)
                     )
             )
-            .shadow(color: .black.opacity(0.28), radius: 22, y: 12)
+            .shadow(color: .black.opacity(0.34), radius: 26, y: 14)
     }
 }
 
