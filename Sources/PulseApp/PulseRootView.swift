@@ -29,7 +29,18 @@ public struct PulseRootView: View {
         .environment(\.pulseBlurArt, stores?.settings.settings.blurThumbnails ?? false)
         .preferredColorScheme(.dark)
         .tint(Theme.accent)
-        .task { await session.boot() }
+        .task {
+            let args = ProcessInfo.processInfo.arguments
+            if args.contains("-pulseDemo") {
+                session.enterDemo()
+                if let i = args.firstIndex(of: "-pulseTab"), args.indices.contains(i + 1),
+                   let tab = AppTab.allCases.first(where: { "\($0)" == args[i + 1] }) { coordinator.tab = tab }
+                coordinator.settingsOpen = args.contains("-pulseSettings")
+                coordinator.tonightOpen = args.contains("-pulseTonight")
+            } else {
+                await session.boot()
+            }
+        }
         .onChange(of: session.phase) { _, phase in handle(phase) }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
