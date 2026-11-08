@@ -4,12 +4,13 @@ import Observation
 
 /// Accent palettes the user can pick in Settings → Appearance. Everything else in the theme is neutral graphite.
 public enum AccentChoice: String, CaseIterable, Identifiable, Sendable {
-    case jade, ice, rose, amber, violet
+    case netflix, jade, ice, rose, amber, violet
 
     public var id: String { rawValue }
 
     public var title: LocalizedStringKey {
         switch self {
+        case .netflix: "Crimson"
         case .jade: "Jade"
         case .ice: "Ice"
         case .rose: "Rose"
@@ -20,6 +21,7 @@ public enum AccentChoice: String, CaseIterable, Identifiable, Sendable {
 
     var base: UInt32 {
         switch self {
+        case .netflix: 0xE50914
         case .jade: 0x5BC0A5
         case .ice: 0x7BA7F5
         case .rose: 0xE88AA3
@@ -30,6 +32,7 @@ public enum AccentChoice: String, CaseIterable, Identifiable, Sendable {
 
     var soft: UInt32 {
         switch self {
+        case .netflix: 0xFF3B45
         case .jade: 0x92D6C3
         case .ice: 0xA9C6FA
         case .rose: 0xF1B0C1
@@ -40,6 +43,7 @@ public enum AccentChoice: String, CaseIterable, Identifiable, Sendable {
 
     var deep: UInt32 {
         switch self {
+        case .netflix: 0xB20710
         case .jade: 0x2F8A76
         case .ice: 0x3F6FCC
         case .rose: 0xB8506C
@@ -55,12 +59,12 @@ public enum AccentChoice: String, CaseIterable, Identifiable, Sendable {
 @Observable
 public final class AccentStore: @unchecked Sendable {
     public static let shared = AccentStore()
-    private static let key = "pulse.accent"
+    private static let key = "pulse.accent.v2"
 
     public private(set) var choice: AccentChoice
 
     private init() {
-        choice = UserDefaults.standard.string(forKey: Self.key).flatMap(AccentChoice.init(rawValue:)) ?? .jade
+        choice = UserDefaults.standard.string(forKey: Self.key).flatMap(AccentChoice.init(rawValue:)) ?? .netflix
     }
 
     public func select(_ choice: AccentChoice) {
@@ -69,12 +73,12 @@ public final class AccentStore: @unchecked Sendable {
     }
 }
 
-/// Graphite Glass: ink-black surfaces, real Liquid Glass on top, one quiet accent.
+/// Cinema Black: pure black, crimson accent, small-radius posters, glass only on system chrome.
 public enum Theme {
-    public static let bg = Color(hex: 0x07080A)
-    public static let surface = Color(hex: 0x0E1013)
-    public static let raised = Color(hex: 0x14171B)
-    public static let elevated = Color(hex: 0x1C2025)
+    public static let bg = Color(hex: 0x000000)
+    public static let surface = Color(hex: 0x141414)
+    public static let raised = Color(hex: 0x1F1F1F)
+    public static let elevated = Color(hex: 0x2A2A2A)
     public static let line = Color.white.opacity(0.07)
     public static let lineStrong = Color.white.opacity(0.14)
 
@@ -82,16 +86,16 @@ public enum Theme {
     public static var accentSoft: Color { Color(hex: AccentStore.shared.choice.soft) }
     public static var accentDeep: Color { Color(hex: AccentStore.shared.choice.deep) }
     /// Text and icons that sit on a solid accent fill (rare: progress knobs, badges).
-    public static let onAccent = Color(hex: 0x07080A)
+    public static let onAccent = Color.white
     /// Soft coral for hearts and live states.
     public static let ember = Color(hex: 0xF08A7A)
     public static let success = Color(hex: 0x6FCF97)
     public static let warning = Color(hex: 0xE9B95F)
     public static let danger = Color(hex: 0xEF6F6F)
 
-    public static let text = Color(hex: 0xF4F5F7)
-    public static let textSecondary = Color(hex: 0xA1A7B0)
-    public static let textTertiary = Color(hex: 0x6B717B)
+    public static let text = Color.white
+    public static let textSecondary = Color(hex: 0xB3B3B3)
+    public static let textTertiary = Color(hex: 0x808080)
 
     public static var gradient: LinearGradient {
         LinearGradient(colors: [accentSoft, accent, accentDeep], startPoint: .topLeading, endPoint: .bottomTrailing)
@@ -101,9 +105,9 @@ public enum Theme {
     public static let rim = LinearGradient(colors: [.white.opacity(0.30), .white.opacity(0.05), .white.opacity(0.12)], startPoint: .topLeading, endPoint: .bottomTrailing)
 
     public enum Radius {
-        public static let card: CGFloat = 24
-        public static let control: CGFloat = 16
-        public static let sheet: CGFloat = 32
+        public static let card: CGFloat = 6
+        public static let control: CGFloat = 6
+        public static let sheet: CGFloat = 16
     }
 
     /// 4-pt grid.

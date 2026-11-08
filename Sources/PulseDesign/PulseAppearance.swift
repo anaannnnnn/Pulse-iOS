@@ -9,7 +9,7 @@ public enum PulseAppearance {
         let standard = UINavigationBarAppearance()
         standard.configureWithDefaultBackground()
         standard.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
-        standard.backgroundColor = UIColor(red: 0.03, green: 0.03, blue: 0.04, alpha: 0.45)
+        standard.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.6)
         standard.titleTextAttributes = [.foregroundColor: ink]
         standard.largeTitleTextAttributes = [.foregroundColor: ink]
 

@@ -3,21 +3,23 @@ import SwiftUI
 import PulseCore
 import PulseDesign
 
-/// Landscape poster card with duration, resolution, favourite heart and a resume bar.
+/// Poster card: tall 2:3 tile by default (title on the art), landscape for "continue watching".
 struct SceneCard: View {
     let scene: Video
     var width: CGFloat?
     /// Adds a centred play button (used by "Continue watching").
     var showsPlay = false
+    /// Tall 2:3 poster with the title over the art, no caption underneath.
+    var portrait = false
     @Environment(FavoritesHub.self) private var hub
     @Environment(PlayerCoordinator.self) private var player
     @Environment(\.zoomNamespace) private var zoomNamespace
 
     var body: some View {
         NavigationLink(value: Route.scene(scene)) {
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 8) {
                 artwork
-                VStack(alignment: .leading, spacing: 3) {
+                if !portrait { VStack(alignment: .leading, spacing: 3) {
                     Text(scene.title)
                         .font(PulseFont.display(15, relativeTo: .subheadline, weight: .semibold))
                         .foregroundStyle(Theme.text)
@@ -26,8 +28,7 @@ struct SceneCard: View {
                         .font(.caption)
                         .foregroundStyle(Theme.textSecondary)
                         .lineLimit(1)
-                }
-                .padding(.horizontal, 2)
+                } }
             }
             .frame(width: width)
         }
@@ -41,21 +42,31 @@ struct SceneCard: View {
 
     private var artwork: some View {
         Color.clear
-            .aspectRatio(16 / 10, contentMode: .fit)
+            .aspectRatio(portrait ? 2 / 3 : 16 / 10, contentMode: .fit)
             .overlay { PulseArt(scene.poster ?? scene.thumb, seed: scene.id) }
-            .pulseSheen()
             .overlay(alignment: .bottom) {
-                LinearGradient(colors: [.clear, .black.opacity(0.65)], startPoint: .center, endPoint: .bottom).allowsHitTesting(false)
+                LinearGradient(colors: [.clear, .black.opacity(portrait ? 0.85 : 0.55)], startPoint: .center, endPoint: .bottom).allowsHitTesting(false)
+            }
+            .overlay(alignment: .bottomLeading) {
+                if portrait {
+                    Text(scene.title)
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(.white)
+                        .lineLimit(2)
+                        .padding(.horizontal, 8).padding(.bottom, 8)
+                }
             }
             .overlay {
                 if showsPlay {
                     Image(systemName: "play.fill").font(.system(size: 17, weight: .semibold)).foregroundStyle(.white)
-                        .frame(width: 52, height: 52).pulseGlass(in: Circle(), tint: Theme.accent.opacity(0.3))
+                        .frame(width: 46, height: 46).background(.black.opacity(0.5), in: Circle()).overlay(Circle().strokeBorder(.white.opacity(0.8), lineWidth: 1.5))
                 }
             }
             .overlay(alignment: .topLeading) {
                 if let label = scene.resolutionLabel, label == "4K" || label == "1440p" {
-                    Chip(LocalizedStringKey(label), tint: Theme.accentSoft).padding(8)
+                    Text(label).font(.system(size: 9, weight: .heavy)).foregroundStyle(.white)
+                        .padding(.horizontal, 5).padding(.vertical, 2)
+                        .background(Theme.accent, in: RoundedRectangle(cornerRadius: 3, style: .continuous)).padding(6)
                 }
             }
             .overlay(alignment: .topTrailing) {
@@ -63,14 +74,12 @@ struct SceneCard: View {
                     Image(systemName: "heart.fill")
                         .font(.caption.weight(.bold))
                         .foregroundStyle(Theme.ember)
-                        .padding(7)
-                        .pulseGlass(in: Circle())
                         .padding(8)
                         .transition(.scale.combined(with: .opacity))
                 }
             }
             .overlay(alignment: .bottomTrailing) {
-                if let runtime = Format.runtime(scene.duration) {
+                if !portrait, let runtime = Format.runtime(scene.duration) {
                     Text(runtime)
                         .font(.caption2.weight(.semibold).monospacedDigit())
                         .foregroundStyle(.white)
@@ -82,17 +91,17 @@ struct SceneCard: View {
             .overlay(alignment: .bottom) {
                 if let progress = scene.progress, !progress.completed, progress.fraction > 0 {
                     GeometryReader { proxy in
-                        Capsule().fill(Theme.gradient)
-                            .frame(width: proxy.size.width * progress.fraction, height: 4)
-
-                            .frame(maxHeight: .infinity, alignment: .bottom)
+                        ZStack(alignment: .leading) {
+                            Rectangle().fill(.white.opacity(0.3))
+                            Rectangle().fill(Theme.accent).frame(width: proxy.size.width * progress.fraction)
+                        }
+                        .frame(height: 3)
+                        .frame(maxHeight: .infinity, alignment: .bottom)
                     }
                     .allowsHitTesting(false)
                 }
             }
             .clipShape(.rect(cornerRadius: Theme.Radius.card, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous).strokeBorder(Theme.rim, lineWidth: 1))
-            .shadow(color: .black.opacity(0.4), radius: 14, y: 8)
             .animation(.snappy, value: hub.isFavorite(scene))
     }
 
@@ -148,11 +157,11 @@ struct SceneRow: View {
     var body: some View {
         NavigationLink(value: Route.scene(scene)) {
             HStack(spacing: 14) {
-                Color.clear.frame(width: 120).aspectRatio(16 / 10, contentMode: .fit)
+                Color.clear.frame(width: 128).aspectRatio(16 / 10, contentMode: .fit)
                     .overlay { PulseArt(scene.poster ?? scene.thumb, seed: scene.id) }
-                    .clipShape(.rect(cornerRadius: 14, style: .continuous))
+                    .clipShape(.rect(cornerRadius: Theme.Radius.card, style: .continuous))
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(scene.title).font(PulseFont.display(15, relativeTo: .subheadline, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
+                    Text(scene.title).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
                     Text([scene.studio?.name, Format.runtime(scene.duration)].compactMap { $0 }.joined(separator: " · "))
                         .font(.caption).foregroundStyle(Theme.textSecondary).lineLimit(1)
                     if let p = scene.progress, !p.completed, p.fraction > 0 {
@@ -160,11 +169,9 @@ struct SceneRow: View {
                     }
                 }
                 Spacer(minLength: 0)
-                Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(Theme.textTertiary)
+                Image(systemName: "play.circle").font(.system(size: 30, weight: .light)).foregroundStyle(Theme.text)
             }
-            .padding(10)
-            .background(.ultraThinMaterial.opacity(0.6), in: .rect(cornerRadius: 20, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Theme.rim, lineWidth: 0.8))
+            .padding(.vertical, 4)
         }
         .buttonStyle(.pressable)
         .zoomSource(id: scene.id, in: zoomNamespace)

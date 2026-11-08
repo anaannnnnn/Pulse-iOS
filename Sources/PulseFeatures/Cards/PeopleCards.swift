@@ -56,11 +56,10 @@ struct PerformerCard: View {
                     .overlay(alignment: .topTrailing) {
                         if hub.isFavorite(performer) {
                             Image(systemName: "heart.fill").font(.caption.weight(.bold)).foregroundStyle(Theme.ember)
-                                .padding(7).pulseGlass(in: Circle()).padding(8)
+                                .padding(8)
                         }
                     }
                     .clipShape(.rect(cornerRadius: Theme.Radius.card, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous).strokeBorder(Theme.rim))
             }
         }
         .buttonStyle(.pressable)
@@ -76,7 +75,7 @@ struct StudioCard: View {
         NavigationLink(value: Route.studio(studio.id)) {
             HStack(spacing: 14) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.placeholder(seed: studio.id))
+                    RoundedRectangle(cornerRadius: 6, style: .continuous).fill(Color.placeholder(seed: studio.id))
                     if studio.logo != nil { PulseArt(studio.logo, seed: studio.id, contentMode: .fit).padding(6) }
                     else { Text(String(studio.name.prefix(1))).font(PulseFont.display(22)).foregroundStyle(.white.opacity(0.85)) }
                 }
@@ -89,8 +88,7 @@ struct StudioCard: View {
                 Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(Theme.textTertiary)
             }
             .padding(12)
-            .background(.ultraThinMaterial.opacity(0.6), in: .rect(cornerRadius: 20, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Theme.rim, lineWidth: 0.8))
+            .background(Theme.surface, in: .rect(cornerRadius: Theme.Radius.card, style: .continuous))
         }
         .buttonStyle(.pressable)
     }

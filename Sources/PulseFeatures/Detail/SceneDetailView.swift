@@ -130,7 +130,7 @@ struct SceneDetailView: View {
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .pulseGlass(in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .pulseGlass(in: RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
     private var glance: some View {
@@ -185,7 +185,7 @@ struct SceneDetailView: View {
                 if let ext = detail?.tpdb?.url, let url = URL(string: ext) { LinkRow(label: "ThePornDB", url: url) }
                 if let ext = detail?.stashdb?.url, let url = URL(string: ext) { LinkRow(label: "StashDB", url: url) }
             }
-            .pulseGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .pulseGlass(in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             HStack(spacing: 10) {
                 Button("Find match", systemImage: "magnifyingglass") { showMatch = true }.buttonStyle(.pulseGlass)
                 Button("Edit", systemImage: "pencil") { showEdit = true }.buttonStyle(.pulseGlass)
@@ -232,7 +232,7 @@ private struct GlanceTile: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading)
-        .pulseGlass(in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .pulseGlass(in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         .accessibilityElement(children: .combine)
     }
 }

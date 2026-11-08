@@ -58,7 +58,7 @@ struct BrowseTiles: View {
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(width: 36, height: 36)
-                    .pulseGlass(in: Circle())
+                    .background(.black.opacity(0.45), in: Circle())
                     .padding(10)
             }
             .overlay(alignment: .bottomLeading) {
@@ -68,8 +68,7 @@ struct BrowseTiles: View {
                     .shadow(color: .black.opacity(0.4), radius: 6, y: 1)
                     .padding(14)
             }
-            .clipShape(.rect(cornerRadius: 26, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(Theme.rim, lineWidth: 1))
+            .clipShape(.rect(cornerRadius: Theme.Radius.card, style: .continuous))
     }
 }
 #endif

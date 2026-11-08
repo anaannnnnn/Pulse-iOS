@@ -60,7 +60,7 @@ public struct PulseGlyph: View {
     }
 }
 
-/// Glass tile with the glyph, plus an optional wordmark.
+/// Bold crimson wordmark, Netflix-style: tight caps, heavy weight, soft glow.
 public struct PulseMark: View {
     var size: CGFloat
     var showsWordmark: Bool
@@ -71,15 +71,14 @@ public struct PulseMark: View {
     }
 
     public var body: some View {
-        HStack(spacing: size * 0.4) {
-            PulseGlyph(size: size)
-                .frame(width: size * 1.7, height: size * 1.7)
-                .pulseGlass(in: RoundedRectangle(cornerRadius: size * 0.55, style: .continuous), tint: Theme.accent.opacity(0.22))
-            if showsWordmark {
-                Text("Pulse")
-                    .font(.system(size: size * 1.05, weight: .semibold))
-                    .tracking(-size * 0.02)
-                    .foregroundStyle(Theme.text)
+        HStack(spacing: size * 0.35) {
+            if !showsWordmark { PulseGlyph(size: size * 1.6) }
+            else {
+                Text("PULSE")
+                    .font(.system(size: size * 1.4, weight: .black))
+                    .tracking(size * 0.12)
+                    .foregroundStyle(Theme.accent)
+                    .shadow(color: Theme.accent.opacity(0.55), radius: size * 0.5)
             }
         }
         .accessibilityElement(children: .ignore)

@@ -64,9 +64,9 @@ public struct Chip: View {
             Text(text).font(.caption.weight(.semibold))
         }
         .foregroundStyle(tint ?? Theme.text)
-        .padding(.horizontal, 12)
-        .frame(minHeight: 28)
-        .pulseCapsuleGlass()
+        .padding(.horizontal, 10)
+        .frame(minHeight: 26)
+        .background(Color.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
     }
 }
 
@@ -149,7 +149,7 @@ public struct SectionHeader: View {
         HStack(alignment: .center, spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 8) {
-                    Text(title).font(PulseFont.title(.title3)).foregroundStyle(Theme.text)
+                    Text(title).font(.system(size: 19, weight: .bold)).foregroundStyle(Theme.text)
                     if let count { CountBadge(count) }
                 }
                 if let subtitle { Text(subtitle).font(.footnote).foregroundStyle(Theme.textSecondary) }
@@ -158,11 +158,12 @@ public struct SectionHeader: View {
             Spacer()
             if let action {
                 Button(action: action) {
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(Theme.text)
-                        .frame(width: 40, height: 40)
-                        .pulseGlass(in: Circle())
+                    HStack(spacing: 2) {
+                        Text("See all").font(.system(size: 13, weight: .semibold))
+                        Image(systemName: "chevron.right").font(.system(size: 11, weight: .bold))
+                    }
+                    .foregroundStyle(Theme.textSecondary)
+                    .frame(minHeight: 40)
                 }
                 .buttonStyle(.pressable)
                 .accessibilityLabel("See all")
@@ -193,7 +194,7 @@ public struct EmptyStateView: View {
                 .padding(22)
                 .pulseGlass(in: Circle(), tint: Theme.accent.opacity(0.15))
                 .symbolEffect(.pulse)
-            Text(title).font(PulseFont.title(.title3)).foregroundStyle(Theme.text)
+            Text(title).font(.system(size: 19, weight: .bold)).foregroundStyle(Theme.text)
             Text(message).font(.subheadline).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
             if let actionTitle, let action {
                 Button(actionTitle, action: action).buttonStyle(.pulsePrimary).padding(.top, 6)

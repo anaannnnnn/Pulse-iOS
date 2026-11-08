@@ -18,6 +18,8 @@ struct MainTabView: View {
             Tab(value: AppTab.search, role: .search) { TabStack { SearchView() } }
         }
         .tabBarMinimizeOnScroll()
+        .tint(.white)
+        .preferredColorScheme(.dark)
         .sensoryFeedback(.selection, trigger: coordinator.tab)
         .fullScreenCover(item: $coordinator.scene) { video in
             PlayerContainer(video: video)

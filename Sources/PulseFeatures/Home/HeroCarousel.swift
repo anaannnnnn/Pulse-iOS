@@ -56,7 +56,7 @@ struct HeroCarousel: View {
                 ForEach(videos.indices, id: \.self) { i in
                     Capsule()
                         .fill(Color.white.opacity(0.28))
-                        .frame(width: i == index ? 32 : 6, height: 6)
+                        .frame(width: i == index ? 24 : 5, height: 4)
                         .overlay(alignment: .leading) {
                             if i == index {
                                 Capsule().fill(Color.white).scaleEffect(x: max(progress, 0.001), anchor: .leading)
@@ -80,34 +80,30 @@ private struct HeroSlide: View {
     @State private var drift = false
 
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
+        ZStack(alignment: .bottom) {
             art
-            Theme.scrim.frame(height: height * 0.6).frame(maxHeight: .infinity, alignment: .bottom).allowsHitTesting(false)
+            LinearGradient(stops: [.init(color: .clear, location: 0), .init(color: .black.opacity(0.55), location: 0.55), .init(color: .black, location: 1)], startPoint: .top, endPoint: .bottom).frame(height: height * 0.62).frame(maxHeight: .infinity, alignment: .bottom).allowsHitTesting(false)
             LinearGradient(colors: [.black.opacity(0.5), .clear], startPoint: .top, endPoint: .bottom)
                 .frame(height: 140).frame(maxHeight: .infinity, alignment: .top).allowsHitTesting(false)
-            VStack(alignment: .leading, spacing: 12) {
-                PulseGlassGroup(spacing: 8) {
-                    HStack(spacing: 8) {
-                        Chip("Featured", systemImage: "sparkle")
-                        if let r = video.resolutionLabel { Chip(LocalizedStringKey(r)) }
-                        if let runtime = Format.runtime(video.duration) { Chip(LocalizedStringKey(runtime), systemImage: "clock") }
-                    }
-                }
+            VStack(spacing: 12) {
                 Text(video.title)
-                    .font(.system(size: 30, weight: .bold))
-                    .tracking(-0.4)
+                    .font(.system(size: 34, weight: .heavy))
+                    .tracking(-0.5)
                     .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
                     .lineLimit(2)
-                    .shadow(color: .black.opacity(0.35), radius: 10, y: 2)
+                    .minimumScaleFactor(0.8)
+                    .shadow(color: .black.opacity(0.5), radius: 12, y: 2)
                     .blur(radius: appeared ? 0 : 12)
-                    .scaleEffect(appeared ? 1 : 1.08, anchor: .leading)
+                    .scaleEffect(appeared ? 1 : 1.08)
                 if !metaLine.isEmpty {
-                    Text(metaLine).font(.subheadline).foregroundStyle(.white.opacity(0.75)).lineLimit(1)
+                    Text(metaLine).font(.system(size: 13, weight: .semibold)).foregroundStyle(.white.opacity(0.85)).lineLimit(1)
                 }
-                actions.padding(.top, 4)
-                Color.clear.frame(height: 20)
+                actions.padding(.top, 6)
+                Color.clear.frame(height: 22)
             }
             .padding(.horizontal, Theme.Space.page)
+            .frame(maxWidth: .infinity)
             .offset(y: appeared ? 0 : 24)
             .opacity(appeared ? 1 : 0)
         }
@@ -128,25 +124,40 @@ private struct HeroSlide: View {
             .scaleEffect(drift ? 1.22 : 1.08)
     }
 
+    /// My List / Play / Info, the classic three-up row.
     private var actions: some View {
-        PulseGlassGroup(spacing: 12) {
-            HStack(spacing: 12) {
-                Button { player.play(video) } label: {
-                    Label(video.isInProgress ? "Resume" : "Play", systemImage: "play.fill")
+        let saved = hub.isFavorite(video)
+        return HStack(spacing: 0) {
+            Button { Task { await hub.toggle(video) } } label: {
+                VStack(spacing: 4) {
+                    Image(systemName: saved ? "checkmark" : "plus").font(.system(size: 22, weight: .semibold))
+                        .contentTransition(.symbolEffect(.replace))
+                    Text("My List").font(.system(size: 11, weight: .semibold))
                 }
-                .buttonStyle(.pulsePrimary)
-                NavigationLink(value: Route.scene(video)) {
-                    Label("Details", systemImage: "info.circle")
-                }
-                .buttonStyle(.pulseGlass)
-                Button { Task { await hub.toggle(video) } } label: {
-                    Image(systemName: hub.isFavorite(video) ? "heart.fill" : "heart")
-                        .symbolEffect(.bounce, value: hub.isFavorite(video))
-                }
-                .buttonStyle(.pulseIcon(isOn: hub.isFavorite(video), tint: Theme.ember))
-                .accessibilityLabel(hub.isFavorite(video) ? "Remove favourite" : "Favourite")
+                .foregroundStyle(.white)
+                .frame(width: 72)
             }
+            .buttonStyle(.pressable)
+            .accessibilityLabel(saved ? "Remove from My List" : "Add to My List")
+            Spacer(minLength: 12)
+            Button { player.play(video) } label: {
+                Label(video.isInProgress ? "Resume" : "Play", systemImage: "play.fill")
+                    .frame(minWidth: 96)
+            }
+            .buttonStyle(.pulsePrimary)
+            Spacer(minLength: 12)
+            NavigationLink(value: Route.scene(video)) {
+                VStack(spacing: 4) {
+                    Image(systemName: "info.circle").font(.system(size: 22, weight: .regular))
+                    Text("Info").font(.system(size: 11, weight: .semibold))
+                }
+                .foregroundStyle(.white)
+                .frame(width: 72)
+            }
+            .buttonStyle(.pressable)
         }
+        .frame(maxWidth: 340)
+        .sensoryFeedback(.success, trigger: saved)
     }
 
     private var metaLine: String {
