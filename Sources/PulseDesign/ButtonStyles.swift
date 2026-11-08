@@ -14,6 +14,7 @@ public struct PulsePrimaryButtonStyle: ButtonStyle {
             .padding(.horizontal, 24)
             .frame(minHeight: 48)
             .pulseCapsuleGlass(tint: Theme.accent.opacity(0.5), interactive: true)
+            .overlay { ShineSweep().clipShape(Capsule()) }
             .opacity(isEnabled ? 1 : 0.45)
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
             .animation(Theme.tap, value: configuration.isPressed)

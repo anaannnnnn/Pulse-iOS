@@ -43,6 +43,7 @@ struct SceneCard: View {
         Color.clear
             .aspectRatio(16 / 10, contentMode: .fit)
             .overlay { PulseArt(scene.poster ?? scene.thumb, seed: scene.id) }
+            .pulseSheen()
             .overlay(alignment: .bottom) {
                 LinearGradient(colors: [.clear, .black.opacity(0.65)], startPoint: .center, endPoint: .bottom).allowsHitTesting(false)
             }

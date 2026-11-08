@@ -38,13 +38,7 @@ public struct PulseArt: View {
     }
 
     private var placeholder: some View {
-        LinearGradient(colors: [.placeholder(seed: seed, shade: 0.06), .placeholder(seed: seed + 5)],
-                       startPoint: .topLeading, endPoint: .bottomTrailing)
-            .overlay {
-                Image(systemName: "play.fill")
-                    .font(.system(size: 28))
-                    .foregroundStyle(.white.opacity(0.14))
-            }
+        PosterArt(seed: seed)
     }
 }
 

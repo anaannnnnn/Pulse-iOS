@@ -24,7 +24,7 @@ struct SignInView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 26) {
-                Spacer(minLength: 56)
+                Spacer(minLength: 72)
                 PulseMark(size: 40)
                     .scaleEffect(appeared ? 1 : 0.7).opacity(appeared ? 1 : 0)
                 VStack(spacing: 8) {
@@ -93,7 +93,7 @@ struct SignInView: View {
             .frame(maxWidth: .infinity)
         }
         .scrollDismissesKeyboard(.interactively)
-        .background { AuroraBackground() }
+        .background { ZStack { AuroraBackground(); PosterWall() } }
         .onAppear { withAnimation(.spring(duration: 0.8, bounce: 0.25).delay(0.1)) { appeared = true } }
         .task {
             email = session.email

@@ -42,6 +42,7 @@ struct FeatureCard: View {
     private var face: some View {
         Color.clear
             .overlay { PulseArt(scene.poster ?? scene.thumb, seed: scene.id) }
+            .pulseSheen(strength: 0.26)
             .overlay {
                 LinearGradient(stops: [.init(color: .clear, location: 0.4), .init(color: .black.opacity(0.7), location: 0.78),
                                        .init(color: .black.opacity(0.92), location: 1)], startPoint: .top, endPoint: .bottom)

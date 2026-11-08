@@ -9,6 +9,10 @@ struct HeroCarousel: View {
     let videos: [Video]
     let height: CGFloat
     @Binding var index: Int
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var progress: CGFloat = 0
+
+    private let dwell: Double = 6
 
     var body: some View {
         ScrollView(.horizontal) {
@@ -30,6 +34,14 @@ struct HeroCarousel: View {
         .frame(height: height)
         .overlay(alignment: .bottom) { pager }
         .sensoryFeedback(.selection, trigger: index)
+        .task(id: index) {
+            progress = 0
+            guard videos.count > 1, !reduceMotion else { return }
+            withAnimation(.linear(duration: dwell)) { progress = 1 }
+            try? await Task.sleep(for: .seconds(dwell))
+            guard !Task.isCancelled else { return }
+            withAnimation(.smooth(duration: 0.8)) { index = (index + 1) % videos.count }
+        }
         .visualEffect { content, proxy in
             // Pulling down stretches the picture instead of exposing a gap.
             let pull = max(proxy.frame(in: .scrollView(axis: .vertical)).minY, 0)
@@ -43,8 +55,13 @@ struct HeroCarousel: View {
             HStack(spacing: 6) {
                 ForEach(videos.indices, id: \.self) { i in
                     Capsule()
-                        .fill(i == index ? Color.white : Color.white.opacity(0.3))
-                        .frame(width: i == index ? 20 : 6, height: 6)
+                        .fill(Color.white.opacity(0.28))
+                        .frame(width: i == index ? 32 : 6, height: 6)
+                        .overlay(alignment: .leading) {
+                            if i == index {
+                                Capsule().fill(Color.white).scaleEffect(x: max(progress, 0.001), anchor: .leading)
+                            }
+                        }
                 }
             }
             .animation(Theme.glide, value: index)
@@ -60,6 +77,7 @@ private struct HeroSlide: View {
     @Environment(PlayerCoordinator.self) private var player
     @Environment(FavoritesHub.self) private var hub
     @State private var appeared = false
+    @State private var drift = false
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
@@ -81,6 +99,8 @@ private struct HeroSlide: View {
                     .foregroundStyle(.white)
                     .lineLimit(2)
                     .shadow(color: .black.opacity(0.35), radius: 10, y: 2)
+                    .blur(radius: appeared ? 0 : 12)
+                    .scaleEffect(appeared ? 1 : 1.08, anchor: .leading)
                 if !metaLine.isEmpty {
                     Text(metaLine).font(.subheadline).foregroundStyle(.white.opacity(0.75)).lineLimit(1)
                 }
@@ -93,15 +113,19 @@ private struct HeroSlide: View {
         }
         .frame(height: height)
         .clipped()
-        .onAppear { withAnimation(.smooth(duration: 0.7).delay(0.1)) { appeared = true } }
+        .onAppear {
+            withAnimation(.smooth(duration: 0.9).delay(0.1)) { appeared = true }
+            withAnimation(.easeInOut(duration: 18).repeatForever(autoreverses: true)) { drift = true }
+        }
     }
 
     private var art: some View {
         PulseArt(video.poster ?? video.thumb, seed: video.id)
             .frame(height: height)
             .visualEffect { content, proxy in
-                content.offset(x: -proxy.frame(in: .scrollView(axis: .horizontal)).minX * 0.25).scaleEffect(1.1)
+                content.offset(x: -proxy.frame(in: .scrollView(axis: .horizontal)).minX * 0.25)
             }
+            .scaleEffect(drift ? 1.22 : 1.08)
     }
 
     private var actions: some View {
