@@ -1,12 +1,16 @@
 # Pulse for iOS
 
 Native SwiftUI client for the Pulse personal streaming server (pCloud + TorBox library, ThePornDB / StashDB metadata).
-It speaks the server's `/api` contract (`docs/API.md` in the Pulse repo) and mirrors the web app's Violet Glass design.
+It speaks the server's `/api` contract (`docs/API.md` in the Pulse repo).
 
 * iOS 18+ (Liquid Glass automatically on iOS 26+ when built with Xcode 26)
 * Swift 6 package, no third-party dependencies
 * Signs in to your Pulse server (default `pulse.devxpert.online`) with the same email and password as the web app
 * Everything works without any account through the built-in **Demo library**
+
+## Design and motion
+
+Pulse uses a cinematic dark palette, layered glass, artwork-driven backgrounds and editorial cards across its existing screens. Shared typography, spacing, controls and spring motion keep the interface consistent. The home hero and content rails add parallax, staggered reveals and press feedback; loading surfaces use shimmer. Reduce Motion disables the large scroll and hero effects and automatic hero advance.
 
 ## Features
 
@@ -30,7 +34,7 @@ It speaks the server's `/api` contract (`docs/API.md` in the Pulse repo) and mir
 Package.swift
 Sources/
   PulseCore/      Models, PulseAPI protocol, HTTP client, demo client, @Observable stores (builds and tests on Linux)
-  PulseDesign/    Violet Glass tokens, glass modifiers, aurora, buttons, art, shared components
+  PulseDesign/    Graphite Glass tokens, glass modifiers, aurora, buttons, art, shared components
   PulseFeatures/  Screens: Home, Library, Search, Detail, People, Saved, Tonight, Player, Settings, Auth
   PulseApp/       PulseRootView (phase routing, tabs, privacy shield). The only thing the app target imports
 App/              @main, Info.plist, asset catalog, privacy manifest
@@ -42,23 +46,38 @@ Tests/PulseCoreTests
 
 ## Run it
 
+Install Xcode with the iOS SDK and XcodeGen on macOS, then:
+
 ```bash
 brew install xcodegen
 scripts/generate-project.sh     # creates Pulse.xcodeproj
 open Pulse.xcodeproj            # choose your team under Signing & Capabilities, run on a device or simulator
 ```
 
-Or open `Package.swift` in Xcode to work on the modules directly.
+Select the **Pulse** scheme and an iOS 18+ simulator or device. For a command-line simulator build:
+
+```bash
+xcodebuild build -project Pulse.xcodeproj -scheme Pulse -configuration Debug \
+  -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO
+```
+
+Or open `Package.swift` in Xcode to work on the modules directly. A physical-device build requires your own signing team and provisioning.
 
 On first launch sign in with your Pulse email and password. Under **Settings → Libraries** connect pCloud and TorBox. The server address is built in; **Server** under the sign-in form lets you point at your own copy.
 
 ## Tests
 
 ```bash
-swift test --filter PulseCoreTests          # 19 tests: decoding, stream fallback, WebVTT, URLs, stores
+swift test --filter PulseCoreTests          # decoding, stream fallback, WebVTT, URLs, stores
 ```
 
-`PulseCore` has no UIKit/SwiftUI imports and is the same code path the app uses, so the logic is verified off-device.
+`PulseCore` has no UIKit/SwiftUI imports and is the same code path the app uses, so the logic is verified off-device. The optional live-server test is skipped unless its environment variables are configured.
+
+## Unsigned IPA on GitHub Actions
+
+In GitHub, open **Actions → Build unsigned iOS IPA → Run workflow**, select a branch and run it. After the run succeeds, download **Pulse-iOS-unsigned-ipa** from the run's Artifacts section and extract `Pulse-unsigned.ipa`.
+
+The workflow generates the Xcode project, archives Release for iOS with signing disabled, and packages the archived app in an IPA `Payload`. It requires no secrets or Apple certificates. The existing `exportOptions.plist` is for the separate signed App Store export, so it is not used for this unsigned package. The IPA is **unsigned** and cannot be installed on a physical device as-is: sign it with your own Apple Developer certificate and matching provisioning profile before installing.
 
 ## Azure DevOps
 

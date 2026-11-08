@@ -51,7 +51,7 @@ struct PerformerDetailView: View {
                     .padding(5)
                     .background(Circle().strokeBorder(Theme.gradient, lineWidth: 3))
                     .shadow(color: Theme.accent.opacity(0.4), radius: 24, y: 10)
-                Text(detail.performer.name).font(PulseFont.display(24, relativeTo: .title)).foregroundStyle(Theme.text).multilineTextAlignment(.center)
+                Text(detail.performer.name).font(PulseFont.display(.title2)).foregroundStyle(Theme.text).multilineTextAlignment(.center)
                 if !detail.aliases.isEmpty {
                     Text("aka " + detail.aliases.prefix(3).joined(separator: ", ")).font(.footnote).foregroundStyle(Theme.textSecondary)
                 }
@@ -140,7 +140,7 @@ struct StudioDetailView: View {
             case .loaded(let detail):
                 VStack(alignment: .leading, spacing: 22) {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text(detail.studio.name).font(PulseFont.display(28, relativeTo: .largeTitle)).foregroundStyle(Theme.text)
+                        Text(detail.studio.name).font(PulseFont.display(.title)).foregroundStyle(Theme.text)
                         if let parent = detail.studio.parent { Text(parent).font(.subheadline).foregroundStyle(Theme.textSecondary) }
                         HStack {
                             Chip("\(detail.scenes.count) scenes", systemImage: "play.rectangle")

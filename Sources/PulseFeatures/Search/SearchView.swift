@@ -22,7 +22,7 @@ public struct SearchView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 26) {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Search").font(PulseFont.display(34, relativeTo: .largeTitle, weight: .heavy)).tracking(-0.6).foregroundStyle(Theme.text)
+                    Text("Search").font(PulseFont.display(.largeTitle, weight: .heavy)).tracking(-0.6).foregroundStyle(Theme.text)
                     searchField
                 }
                 .padding(.horizontal, Theme.Space.page)
@@ -58,7 +58,7 @@ public struct SearchView: View {
                 .foregroundStyle(focused ? Theme.accent : Theme.textSecondary)
                 .symbolEffect(.bounce, value: focused)
             TextField("Videos, performers, studios", text: $text)
-                .font(.system(size: 18, weight: .medium))
+                .font(.body.weight(.medium))
                 .foregroundStyle(Theme.text)
                 .tint(Theme.accent)
                 .focused($focused)
@@ -76,7 +76,7 @@ public struct SearchView: View {
             }
         }
         .padding(.horizontal, 20)
-        .frame(height: 60)
+        .frame(minHeight: 60)
         .pulseGlass(in: RoundedRectangle(cornerRadius: 30, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).strokeBorder(Theme.accent.opacity(focused ? 0.75 : 0), lineWidth: 1.5))
         .shadow(color: Theme.accent.opacity(focused ? 0.28 : 0), radius: 18)

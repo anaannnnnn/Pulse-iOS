@@ -93,6 +93,7 @@ public struct PulseSegmented<Value: Hashable>: View {
     let options: [(value: Value, title: LocalizedStringKey, icon: String?)]
     @Binding var selection: Value
     @Namespace private var pill
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(selection: Binding<Value>, options: [(value: Value, title: LocalizedStringKey, icon: String?)]) {
         self._selection = selection
@@ -105,7 +106,7 @@ public struct PulseSegmented<Value: Hashable>: View {
                 let option = options[i]
                 let selected = option.value == selection
                 Button {
-                    withAnimation(Theme.glide) { selection = option.value }
+                    withAnimation(reduceMotion ? nil : Theme.glide) { selection = option.value }
                 } label: {
                     HStack(spacing: 6) {
                         if let icon = option.icon { Image(systemName: icon).font(.caption.weight(.bold)) }
@@ -178,7 +179,6 @@ public struct EmptyStateView: View {
     let systemImage: String
     var actionTitle: LocalizedStringKey?
     var action: (() -> Void)?
-
     public init(_ title: LocalizedStringKey, message: LocalizedStringKey, systemImage: String,
                 actionTitle: LocalizedStringKey? = nil, action: (() -> Void)? = nil) {
         self.title = title; self.message = message; self.systemImage = systemImage
@@ -192,7 +192,6 @@ public struct EmptyStateView: View {
                 .foregroundStyle(Theme.accentSoft)
                 .padding(22)
                 .pulseGlass(in: Circle(), tint: Theme.accent.opacity(0.15))
-                .symbolEffect(.pulse)
             Text(title).font(PulseFont.title(.title3)).foregroundStyle(Theme.text)
             Text(message).font(.subheadline).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
             if let actionTitle, let action {
@@ -251,29 +250,46 @@ public extension View {
     func pulseToast(_ message: Binding<String?>) -> some View { modifier(ToastModifier(message: message)) }
 
     /// Cards fade, scale and sink slightly as they scroll in/out of view.
-    func pulseScrollReveal() -> some View {
-        scrollTransition(.animated(.smooth).threshold(.visible(0.15))) { content, phase in
-            content
-                .opacity(phase.isIdentity ? 1 : 0.3)
-                .scaleEffect(phase.isIdentity ? 1 : 0.9)
-                .blur(radius: phase.isIdentity ? 0 : 3)
-        }
+    func pulseScrollReveal(delay: Double = 0) -> some View {
+        modifier(ScrollRevealModifier(delay: delay))
     }
 
     /// Curved carousel: neighbours swing away on a Y axis and shrink, like the category cards in the references.
     func pulseCurvedCarousel(angle: Double = 24) -> some View {
-        scrollTransition(.interactive, axis: .horizontal) { content, phase in
-            content
-                .rotation3DEffect(.degrees(phase.value * -angle), axis: (x: 0, y: 1, z: 0), perspective: 0.55)
-                .scaleEffect(1 - abs(phase.value) * 0.1)
-                .offset(x: phase.value * -14)
-                .opacity(1 - abs(phase.value) * 0.35)
-        }
+        modifier(CurvedCarouselModifier(angle: angle))
     }
 
     /// Slowly rotating mint highlight around a shape's edge. Static under Reduce Motion.
     func pulseGlowBorder<S: InsettableShape>(_ shape: S, lineWidth: CGFloat = 1.4) -> some View {
         modifier(GlowBorder(shape: shape, lineWidth: lineWidth))
+    }
+}
+
+private struct ScrollRevealModifier: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let delay: Double
+
+    func body(content: Content) -> some View {
+        content.scrollTransition(.animated(Theme.entrance.delay(delay)).threshold(.visible(0.15))) { content, phase in
+            content
+                .opacity(reduceMotion || phase.isIdentity ? 1 : 0.55)
+                .scaleEffect(reduceMotion || phase.isIdentity ? 1 : 0.96)
+        }
+    }
+}
+
+private struct CurvedCarouselModifier: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let angle: Double
+
+    func body(content: Content) -> some View {
+        content.scrollTransition(.interactive, axis: .horizontal) { content, phase in
+            content
+                .rotation3DEffect(.degrees(reduceMotion ? 0 : phase.value * -angle), axis: (x: 0, y: 1, z: 0), perspective: 0.55)
+                .scaleEffect(reduceMotion ? 1 : 1 - abs(phase.value) * 0.1)
+                .offset(x: reduceMotion ? 0 : phase.value * -14)
+                .opacity(reduceMotion ? 1 : 1 - abs(phase.value) * 0.35)
+        }
     }
 }
 
@@ -300,6 +316,7 @@ public struct CountUpText: View {
     let value: Int
     var compact: Bool
     @State private var shown = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(_ value: Int, compact: Bool = false) {
         self.value = value
@@ -310,7 +327,7 @@ public struct CountUpText: View {
         Text(shown, format: compact ? .number.notation(.compactName) : .number)
             .contentTransition(.numericText(value: Double(shown)))
             .task(id: value) {
-                withAnimation(.smooth(duration: 1.1)) { shown = value }
+                withAnimation(reduceMotion ? nil : .smooth(duration: 1.1)) { shown = value }
             }
     }
 }

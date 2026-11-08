@@ -71,11 +71,11 @@ public final class AccentStore: @unchecked Sendable {
 
 /// Graphite Glass: ink-black surfaces, real Liquid Glass on top, one quiet accent.
 public enum Theme {
-    public static let bg = Color(hex: 0x07080A)
-    public static let surface = Color(hex: 0x0E1013)
-    public static let raised = Color(hex: 0x14171B)
-    public static let elevated = Color(hex: 0x1C2025)
-    public static let line = Color.white.opacity(0.07)
+    public static let bg = Color(hex: 0x080910)
+    public static let surface = Color(hex: 0x10121C)
+    public static let raised = Color(hex: 0x191B27)
+    public static let elevated = Color(hex: 0x242635)
+    public static let line = Color.white.opacity(0.09)
     public static let lineStrong = Color.white.opacity(0.14)
 
     public static var accent: Color { Color(hex: AccentStore.shared.choice.base) }
@@ -91,7 +91,7 @@ public enum Theme {
 
     public static let text = Color(hex: 0xF4F5F7)
     public static let textSecondary = Color(hex: 0xA1A7B0)
-    public static let textTertiary = Color(hex: 0x6B717B)
+    public static let textTertiary = Color(hex: 0x9299A5)
 
     public static var gradient: LinearGradient {
         LinearGradient(colors: [accentSoft, accent, accentDeep], startPoint: .topLeading, endPoint: .bottomTrailing)
@@ -118,6 +118,7 @@ public enum Theme {
     public static let tap: Animation = .spring(duration: 0.3, bounce: 0.3)
     /// Spring for larger moves (sheets, cards, pills).
     public static let glide: Animation = .spring(duration: 0.5, bounce: 0.2)
+    public static let entrance: Animation = .spring(duration: 0.7, bounce: 0.12)
 }
 
 public extension Color {
@@ -138,12 +139,12 @@ public extension Color {
 
 /// System fonts only: SF Pro for UI and titles, New York for editorial moments.
 public enum PulseFont {
-    public static func display(_ size: CGFloat, relativeTo style: Font.TextStyle = .title, weight: Font.Weight = .bold) -> Font {
-        .system(size: size, weight: weight)
+    public static func display(_ style: Font.TextStyle = .title, weight: Font.Weight = .bold) -> Font {
+        .system(style, weight: weight)
     }
 
-    public static func serif(_ size: CGFloat, relativeTo style: Font.TextStyle = .title, italic: Bool = false) -> Font {
-        let font = Font.system(size: size, weight: .regular, design: .serif)
+    public static func serif(_ style: Font.TextStyle = .title, italic: Bool = false) -> Font {
+        let font = Font.system(style, design: .serif, weight: .regular)
         return italic ? font.italic() : font
     }
 

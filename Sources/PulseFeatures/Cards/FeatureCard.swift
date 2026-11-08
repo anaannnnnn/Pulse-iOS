@@ -51,7 +51,7 @@ struct FeatureCard: View {
                 VStack(spacing: 10) {
                     if !scene.performers.isEmpty { cast }
                     Text(scene.title)
-                        .font(PulseFont.serif(26, relativeTo: .title2))
+                        .font(PulseFont.serif(.title))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
                         .lineLimit(2)

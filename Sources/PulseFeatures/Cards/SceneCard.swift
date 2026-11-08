@@ -19,7 +19,7 @@ struct SceneCard: View {
                 artwork
                 VStack(alignment: .leading, spacing: 3) {
                     Text(scene.title)
-                        .font(PulseFont.display(15, relativeTo: .subheadline, weight: .semibold))
+                        .font(PulseFont.display(.subheadline, weight: .semibold))
                         .foregroundStyle(Theme.text)
                         .lineLimit(2, reservesSpace: false)
                     Text(subtitle)
@@ -152,7 +152,7 @@ struct SceneRow: View {
                     .overlay { PulseArt(scene.poster ?? scene.thumb, seed: scene.id) }
                     .clipShape(.rect(cornerRadius: 14, style: .continuous))
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(scene.title).font(PulseFont.display(15, relativeTo: .subheadline, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
+                    Text(scene.title).font(PulseFont.display(.subheadline, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
                     Text([scene.studio?.name, Format.runtime(scene.duration)].compactMap { $0 }.joined(separator: " · "))
                         .font(.caption).foregroundStyle(Theme.textSecondary).lineLimit(1)
                     if let p = scene.progress, !p.completed, p.fraction > 0 {
