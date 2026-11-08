@@ -15,13 +15,13 @@ public struct PulseRootView: View {
 
     public var body: some View {
         ZStack {
-            Theme.bg.ignoresSafeArea()
+            ImmersiveBackground()
             phaseContent
                 .transition(.opacity.combined(with: .scale(scale: 1.02)))
             if shieldVisible { PrivacyShield().transition(.opacity).zIndex(10) }
         }
-        .animation(.smooth(duration: 0.4), value: session.phase)
-        .animation(.smooth(duration: 0.2), value: shieldVisible)
+        .animation(PulseMotion.gentleSpring, value: session.phase)
+        .animation(PulseMotion.quick, value: shieldVisible)
         .environment(session)
         .environment(coordinator)
         .environment(\.pulseImageBase, session.api.baseURL)
