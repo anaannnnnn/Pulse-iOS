@@ -58,7 +58,7 @@ public struct SearchView: View {
                 .foregroundStyle(focused ? Theme.accent : Theme.textSecondary)
                 .symbolEffect(.bounce, value: focused)
             TextField("Videos, performers, studios", text: $text)
-                .font(.system(size: 18, weight: .medium))
+                .font(.system(.body, weight: .medium))
                 .foregroundStyle(Theme.text)
                 .tint(Theme.accent)
                 .focused($focused)
@@ -76,9 +76,9 @@ public struct SearchView: View {
             }
         }
         .padding(.horizontal, 20)
-        .frame(height: 60)
-        .pulseGlass(in: RoundedRectangle(cornerRadius: 30, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).strokeBorder(Theme.accent.opacity(focused ? 0.75 : 0), lineWidth: 1.5))
+        .frame(minHeight: 56)
+        .background(Theme.raised, in: Capsule())
+        .overlay(Capsule().strokeBorder(Theme.accent.opacity(focused ? 0.75 : 0), lineWidth: 1.5))
         .shadow(color: Theme.accent.opacity(focused ? 0.28 : 0), radius: 18)
         .animation(Theme.tap, value: focused)
     }
@@ -98,7 +98,7 @@ public struct SearchView: View {
                         ForEach(recents, id: \.self) { term in
                             Button { text = term } label: {
                                 Label(term, systemImage: "clock.arrow.circlepath").font(.footnote.weight(.semibold)).foregroundStyle(Theme.text)
-                                    .padding(.horizontal, 12).frame(minHeight: 36).pulseCapsuleGlass()
+                                    .padding(.horizontal, 12).frame(minHeight: 36).pulsePill()
                             }
                         }
                     }

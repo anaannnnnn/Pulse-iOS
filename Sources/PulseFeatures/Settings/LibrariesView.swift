@@ -103,7 +103,7 @@ struct LibrariesView: View {
 
     private func behaviour(settings: Binding<LibrarySettings>) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Keeping it up to date").font(PulseFont.title(.headline)).foregroundStyle(Theme.text)
+            Text("Keeping it up to date").font(PulseFont.headline(.title3)).foregroundStyle(Theme.text)
             VStack(spacing: 0) {
                 Toggle("Match new videos automatically", isOn: settings.autoMatch).padding(.horizontal, 16).frame(minHeight: 52)
                 Divider().overlay(Theme.line)
@@ -154,7 +154,7 @@ private struct PlatformCard<Extra: View>: View {
                         .frame(width: 52, height: 52)
                         .background(tint.opacity(0.16), in: .rect(cornerRadius: 16, style: .continuous))
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(title).font(PulseFont.title(.headline)).foregroundStyle(Theme.text)
+                        Text(title).font(PulseFont.headline(.title3)).foregroundStyle(Theme.text)
                         Text(detail).font(.footnote).foregroundStyle(Theme.textSecondary).lineLimit(2)
                     }
                     Spacer(minLength: 0)
@@ -165,7 +165,7 @@ private struct PlatformCard<Extra: View>: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .pulseGlass(in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .pulsePanel()
         }
         .buttonStyle(.pressable)
         .accessibilityElement(children: .combine)

@@ -8,6 +8,7 @@ on:
 jobs:
   shots:
     runs-on: macos-15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -45,7 +46,7 @@ jobs:
             local tag=$1 rx=$2 size=$3
             local UDID; UDID=$(pick "$rx")
             if [ -z "$UDID" ]; then echo "no device for $tag"; return; fi
-            xcrun simctl boot "$UDID"; xcrun simctl bootstatus "$UDID" -b
+            xcrun simctl boot "$UDID"; perl -e 'alarm 240; exec @ARGV' xcrun simctl bootstatus "$UDID" -b || { echo "boot timeout $tag"; return; }
             xcrun simctl ui "$UDID" appearance dark || true
             xcrun simctl ui "$UDID" content_size "$size" || true
             xcrun simctl install "$UDID" "$APP"
@@ -69,7 +70,6 @@ jobs:
           run_device pro 'iPhone 1[0-9] Pro$' large
           run_device se 'iPhone SE' extra-large
           run_device max 'iPhone 1[0-9] Pro Max' accessibility-large
-          run_device ipad 'iPad (Pro|Air)' large
           ls -l shots
 
       - uses: actions/upload-artifact@v4

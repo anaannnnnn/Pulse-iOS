@@ -57,7 +57,7 @@ struct SceneDetailView: View {
     // MARK: Sections
 
     private var hero: some View {
-        Color.clear.frame(height: 520)
+        Color.clear.aspectRatio(0.82, contentMode: .fit).frame(maxHeight: 620)
             .overlay { PulseArt(detail?.backdrop ?? current.poster ?? current.thumb, seed: current.id) }
             .overlay { Theme.scrim }
             .visualEffect { content, proxy in
@@ -71,8 +71,7 @@ struct SceneDetailView: View {
     private var titleBlock: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(current.title)
-                .font(PulseFont.display(34, relativeTo: .largeTitle, weight: .heavy))
-                .tracking(-0.7)
+                .font(.system(.largeTitle, design: .serif, weight: .bold))
                 .foregroundStyle(Theme.text)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 8) {
@@ -125,17 +124,17 @@ struct SceneDetailView: View {
 
     private func synopsis(_ text: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Overview").font(PulseFont.title(.headline)).foregroundStyle(Theme.text)
+            Text("Overview").font(PulseFont.headline(.title3)).foregroundStyle(Theme.text)
             Text(text).font(.body).foregroundStyle(Theme.textSecondary).lineSpacing(3)
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .pulseGlass(in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .pulsePanel()
     }
 
     private var glance: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("At a glance").font(PulseFont.title(.headline)).foregroundStyle(Theme.text)
+            Text("At a glance").font(PulseFont.headline(.title3)).foregroundStyle(Theme.text)
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
                 GlanceTile(label: "Duration", value: Format.clock(current.duration), systemImage: "clock")
                 GlanceTile(label: "Quality", value: [current.resolutionLabel, current.width.flatMap { w in current.height.map { "\(w)×\($0)" } }].compactMap { $0 }.first ?? "—", systemImage: "sparkles.tv")
@@ -151,7 +150,7 @@ struct SceneDetailView: View {
 
     private func cast(_ performers: [Performer]) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Cast").font(PulseFont.title(.headline)).foregroundStyle(Theme.text)
+            Text("Cast").font(PulseFont.headline(.title3)).foregroundStyle(Theme.text)
             ScrollView(.horizontal) {
                 HStack(spacing: 16) { ForEach(performers) { PerformerBubble(performer: $0) } }.padding(.vertical, 4)
             }
@@ -162,12 +161,12 @@ struct SceneDetailView: View {
 
     private func tags(_ tags: [Tag]) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Tags").font(PulseFont.title(.headline)).foregroundStyle(Theme.text)
+            Text("Tags").font(PulseFont.headline(.title3)).foregroundStyle(Theme.text)
             FlowLayout(spacing: 8) {
                 ForEach(tags) { tag in
                     NavigationLink(value: Route.filtered(title: tag.name, query: tagQuery(tag))) {
                         Text(tag.name).font(.footnote.weight(.semibold)).foregroundStyle(Theme.text)
-                            .padding(.horizontal, 12).frame(minHeight: 34).pulseCapsuleGlass()
+                            .padding(.horizontal, 12).frame(minHeight: 34).pulsePill()
                     }
                 }
             }
@@ -178,14 +177,14 @@ struct SceneDetailView: View {
 
     private var matching: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Metadata").font(PulseFont.title(.headline)).foregroundStyle(Theme.text)
+            Text("Metadata").font(PulseFont.headline(.title3)).foregroundStyle(Theme.text)
             VStack(spacing: 0) {
                 MetaRow(label: "Status", value: current.matchStatus.rawValue.capitalized)
                 if let c = current.matchConfidence { MetaRow(label: "Confidence", value: Format.percent(c)) }
                 if let ext = detail?.tpdb?.url, let url = URL(string: ext) { LinkRow(label: "ThePornDB", url: url) }
                 if let ext = detail?.stashdb?.url, let url = URL(string: ext) { LinkRow(label: "StashDB", url: url) }
             }
-            .pulseGlass(in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .pulsePanel()
             HStack(spacing: 10) {
                 Button("Find match", systemImage: "magnifyingglass") { showMatch = true }.buttonStyle(.pulseGlass)
                 Button("Edit", systemImage: "pencil") { showEdit = true }.buttonStyle(.pulseGlass)
@@ -199,7 +198,7 @@ struct SceneDetailView: View {
 
     private var fileInfo: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("File").font(PulseFont.title(.headline)).foregroundStyle(Theme.text)
+            Text("File").font(PulseFont.headline(.title3)).foregroundStyle(Theme.text)
             Text(current.path).font(.caption.monospaced()).foregroundStyle(Theme.textTertiary).textSelection(.enabled)
             if current.progress != nil {
                 Button("Clear watch progress", systemImage: "arrow.counterclockwise") { Task { await store.clearProgress() } }
@@ -232,7 +231,7 @@ private struct GlanceTile: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading)
-        .pulseGlass(in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .pulsePanel()
         .accessibilityElement(children: .combine)
     }
 }

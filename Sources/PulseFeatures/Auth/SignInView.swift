@@ -124,7 +124,7 @@ struct SignInView: View {
                     .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL)
                     .focused($focus, equals: .server)
                     .padding(.horizontal, 14).frame(minHeight: 46)
-                    .pulseGlass(in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .background(Theme.raised, in: RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous))
                 HStack {
                     Button("Use this server") { Task { await session.useServer(serverText) } }.buttonStyle(.pulseGlass)
                     if session.usesCustomServer {

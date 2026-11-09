@@ -140,7 +140,7 @@ struct SceneQuickLook: View {
             Color.clear.aspectRatio(16 / 9, contentMode: .fit)
                 .overlay { PulseArt(scene.poster ?? scene.thumb, seed: scene.id) }
                 .clipShape(.rect(cornerRadius: 16))
-            Text(scene.title).font(PulseFont.title(.headline)).foregroundStyle(Theme.text)
+            Text(scene.title).font(PulseFont.headline(.title3)).foregroundStyle(Theme.text)
             if let studio = scene.studio?.name { Text(studio).font(.subheadline).foregroundStyle(Theme.textSecondary) }
         }
         .padding(14)

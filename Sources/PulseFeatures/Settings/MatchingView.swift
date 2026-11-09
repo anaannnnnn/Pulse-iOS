@@ -62,7 +62,7 @@ struct MatchingView: View {
     private func jobCard(_ job: MatchJobStatus) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(job.state == .running ? (job.paused ? "Paused" : "Matching…") : "Idle").font(PulseFont.title(.headline))
+                Text(job.state == .running ? (job.paused ? "Paused" : "Matching…") : "Idle").font(PulseFont.headline(.title3))
                 Spacer()
                 if job.state == .running, job.rate > 0 { Text("\(Int(job.rate))/min").font(.caption.monospacedDigit()).foregroundStyle(Theme.textSecondary) }
             }
@@ -116,7 +116,7 @@ struct SourcesSettingsView: View {
         VStack(alignment: .leading, spacing: 10) {
             Toggle(isOn: enabled) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(provider.label).font(PulseFont.title(.headline))
+                    Text(provider.label).font(PulseFont.headline(.title3))
                     Text(source?.configured == true ? "Key configured" : "No key on the server")
                         .font(.caption).foregroundStyle(source?.configured == true ? Theme.success : Theme.warning)
                 }

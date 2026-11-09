@@ -28,6 +28,17 @@ private struct GlassModifier<S: Shape>: ViewModifier {
 }
 
 public extension View {
+    /// Solid content-layer panel: glass is reserved for floating controls, so grouped content gets a hairline slate instead.
+    func pulsePanel(radius: CGFloat = Theme.Radius.panel) -> some View {
+        background(Theme.surface, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: radius, style: .continuous).strokeBorder(Theme.line, lineWidth: 1))
+    }
+
+    /// Small solid pill for tags and filters.
+    func pulsePill() -> some View {
+        background(Color.white.opacity(0.1), in: Capsule())
+    }
+
     /// Liquid Glass on iOS 26+, frosted material with a bright rim before that.
     func pulseGlass<S: Shape>(in shape: S = RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous),
                               tint: Color? = nil, interactive: Bool = false) -> some View {

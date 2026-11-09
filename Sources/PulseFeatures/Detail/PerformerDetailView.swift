@@ -74,7 +74,7 @@ struct PerformerDetailView: View {
 
             if let bio = detail.bio, !bio.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("About").font(PulseFont.title(.headline)).foregroundStyle(Theme.text)
+                    Text("About").font(PulseFont.headline(.title3)).foregroundStyle(Theme.text)
                     Text(bio).font(.body).foregroundStyle(Theme.textSecondary).lineSpacing(3)
                 }
                 .padding(.horizontal, Theme.Space.page)

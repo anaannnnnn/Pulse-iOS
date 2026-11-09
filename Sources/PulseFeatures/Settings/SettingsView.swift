@@ -75,7 +75,7 @@ public struct SettingsView: View {
         HStack(spacing: 14) {
             PulseMark(size: 24, showsWordmark: false)
             VStack(alignment: .leading, spacing: 3) {
-                Text(session.isDemo ? "Demo library" : (session.email.isEmpty ? "Signed in" : session.email)).font(PulseFont.title(.headline)).foregroundStyle(Theme.text).lineLimit(1)
+                Text(session.isDemo ? "Demo library" : (session.email.isEmpty ? "Signed in" : session.email)).font(PulseFont.headline(.title3)).foregroundStyle(Theme.text).lineLimit(1)
                 Text(session.isDemo ? "Sample data, no account needed" : (session.serverURL.host() ?? "Pulse")).font(.footnote).foregroundStyle(Theme.success)
             }
             Spacer()
@@ -83,7 +83,7 @@ public struct SettingsView: View {
                 .accessibilityHidden(true)
         }
         .padding(16)
-        .pulseGlass(in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .pulsePanel()
         .padding(.vertical, 6)
     }
 }
