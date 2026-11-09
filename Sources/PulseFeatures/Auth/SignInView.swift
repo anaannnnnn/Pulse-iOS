@@ -28,9 +28,9 @@ struct SignInView: View {
                 PulseMark(size: 30)
                     .scaleEffect(appeared ? 1 : 0.7).opacity(appeared ? 1 : 0)
                 VStack(spacing: 8) {
-                    Text("Welcome back").font(.system(.largeTitle, design: .serif, weight: .bold)).multilineTextAlignment(.center).foregroundStyle(Theme.text)
+                    Text("Take your seat").font(PulseFont.display(.largeTitle, scale: 1.3, weight: .semibold)).multilineTextAlignment(.center).foregroundStyle(Theme.text)
                     Text(session.isDemo ? "Demo library" : "Use the same account as your Pulse server.")
-                        .font(.subheadline).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
+                        .font(PulseFont.ui(.subheadline)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
                 }
                 VStack(spacing: 12) {
                     field(systemImage: "envelope.fill") {
@@ -52,13 +52,13 @@ struct SignInView: View {
                     }
                     if BiometricVault.isAvailable {
                         Toggle(isOn: $useBiometrics) {
-                            Label("Sign in with \(BiometricVault.name) next time", systemImage: BiometricVault.symbol).font(.subheadline)
+                            Label("Sign in with \(BiometricVault.name) next time", systemImage: BiometricVault.symbol).font(PulseFont.ui(.subheadline))
                         }
                         .tint(Theme.accent)
                     }
                     if let message = session.authError {
                         Label(message, systemImage: "exclamationmark.triangle.fill")
-                            .font(.footnote).foregroundStyle(Theme.danger)
+                            .font(PulseFont.ui(.footnote)).foregroundStyle(Theme.danger)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .accessibilityAddTraits(.updatesFrequently)
                     }
@@ -85,7 +85,7 @@ struct SignInView: View {
                 .offset(y: appeared ? 0 : 40).opacity(appeared ? 1 : 0)
 
                 Button("Explore the demo library") { session.enterDemo() }
-                    .font(.footnote).foregroundStyle(Theme.textSecondary).frame(minHeight: 44)
+                    .font(PulseFont.ui(.footnote)).foregroundStyle(Theme.textSecondary).frame(minHeight: 44)
 
                 advanced
             }
@@ -119,7 +119,7 @@ struct SignInView: View {
         DisclosureGroup(isExpanded: $showAdvanced) {
             VStack(alignment: .leading, spacing: 10) {
                 Text("Pulse connects to \(PulseDefaults.serverURL.host() ?? "your server") by default. Only change this if you run your own copy.")
-                    .font(.caption).foregroundStyle(Theme.textSecondary)
+                    .font(PulseFont.ui(.caption)).foregroundStyle(Theme.textSecondary)
                 TextField(PulseDefaults.serverURL.absoluteString, text: $serverText)
                     .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL)
                     .focused($focus, equals: .server)
@@ -129,13 +129,13 @@ struct SignInView: View {
                     Button("Use this server") { Task { await session.useServer(serverText) } }.buttonStyle(.pulseGlass)
                     if session.usesCustomServer {
                         Button("Reset") { serverText = ""; Task { await session.useServer(nil) } }
-                            .font(.footnote).foregroundStyle(Theme.textSecondary)
+                            .font(PulseFont.ui(.footnote)).foregroundStyle(Theme.textSecondary)
                     }
                 }
             }
             .padding(.top, 8)
         } label: {
-            Label("Server", systemImage: "server.rack").font(.footnote).foregroundStyle(Theme.textSecondary)
+            Label("Server", systemImage: "server.rack").font(PulseFont.ui(.footnote)).foregroundStyle(Theme.textSecondary)
         }
         .tint(Theme.textSecondary)
         .frame(maxWidth: 420)

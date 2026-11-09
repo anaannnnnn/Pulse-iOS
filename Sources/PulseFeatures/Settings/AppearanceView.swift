@@ -49,7 +49,7 @@ struct AppearanceView: View {
                     .padding(4)
                     .overlay(Circle().strokeBorder(.white.opacity(selected ? 0.85 : 0), lineWidth: 2))
                     .scaleEffect(selected ? 1.08 : 1)
-                Text(choice.title).font(.caption2.weight(.medium)).foregroundStyle(selected ? Theme.text : Theme.textSecondary)
+                Text(choice.title).font(PulseFont.ui(.caption2, weight: .medium)).foregroundStyle(selected ? Theme.text : Theme.textSecondary)
             }
             .frame(maxWidth: .infinity)
         }

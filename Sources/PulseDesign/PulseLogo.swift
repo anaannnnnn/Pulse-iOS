@@ -75,8 +75,7 @@ public struct PulseMark: View {
             PulseGlyph(size: showsWordmark ? size * 1.5 : size * 1.6)
             if showsWordmark {
                 Text("Pulse")
-                    .font(.system(size: size * 1.35, weight: .semibold, design: .serif))
-                    .tracking(-size * 0.02)
+                    .font(.custom(PulseFont.displayItalic, size: size * 1.5).weight(.semibold))
                     .foregroundStyle(Theme.text)
             }
         }

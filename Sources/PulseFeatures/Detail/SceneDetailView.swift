@@ -71,17 +71,17 @@ struct SceneDetailView: View {
     private var titleBlock: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(current.title)
-                .font(.system(.largeTitle, design: .serif, weight: .bold))
+                .font(PulseFont.display(.largeTitle, weight: .bold))
                 .foregroundStyle(Theme.text)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 8) {
                 if let studio = current.studio {
                     NavigationLink(value: Route.studio(studio.id)) {
-                        Label(studio.name, systemImage: "building.2").font(.subheadline.weight(.semibold)).foregroundStyle(Theme.accent)
+                        Label(studio.name, systemImage: "building.2").font(PulseFont.ui(.subheadline, weight: .semibold)).foregroundStyle(Theme.accent)
                     }
                 }
-                if let year = current.year { Text(String(year)).font(.subheadline).foregroundStyle(Theme.textSecondary) }
-                if let runtime = Format.runtime(current.duration) { Text("· \(runtime)").font(.subheadline).foregroundStyle(Theme.textSecondary) }
+                if let year = current.year { Text(String(year)).font(PulseFont.ui(.subheadline)).foregroundStyle(Theme.textSecondary) }
+                if let runtime = Format.runtime(current.duration) { Text("· \(runtime)").font(PulseFont.ui(.subheadline)).foregroundStyle(Theme.textSecondary) }
             }
             if let badge = matchBadge { Chip(LocalizedStringKey(badge), systemImage: "checkmark.seal.fill", tint: Theme.success) }
         }
@@ -125,7 +125,7 @@ struct SceneDetailView: View {
     private func synopsis(_ text: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Overview").font(PulseFont.headline(.title3)).foregroundStyle(Theme.text)
-            Text(text).font(.body).foregroundStyle(Theme.textSecondary).lineSpacing(3)
+            Text(text).font(PulseFont.ui(.body)).foregroundStyle(Theme.textSecondary).lineSpacing(3)
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -165,7 +165,7 @@ struct SceneDetailView: View {
             FlowLayout(spacing: 8) {
                 ForEach(tags) { tag in
                     NavigationLink(value: Route.filtered(title: tag.name, query: tagQuery(tag))) {
-                        Text(tag.name).font(.footnote.weight(.semibold)).foregroundStyle(Theme.text)
+                        Text(tag.name).font(PulseFont.ui(.footnote, weight: .semibold)).foregroundStyle(Theme.text)
                             .padding(.horizontal, 12).frame(minHeight: 34).pulsePill()
                     }
                 }
@@ -192,7 +192,7 @@ struct SceneDetailView: View {
                     Button("Unmatch", systemImage: "link.badge.plus") { confirmUnmatch = true }.buttonStyle(.pulseGlass(tint: Theme.danger))
                 }
             }
-            .font(.subheadline)
+            .font(PulseFont.ui(.subheadline))
         }
     }
 
@@ -202,7 +202,7 @@ struct SceneDetailView: View {
             Text(current.path).font(.caption.monospaced()).foregroundStyle(Theme.textTertiary).textSelection(.enabled)
             if current.progress != nil {
                 Button("Clear watch progress", systemImage: "arrow.counterclockwise") { Task { await store.clearProgress() } }
-                    .font(.footnote).foregroundStyle(Theme.textSecondary)
+                    .font(PulseFont.ui(.footnote)).foregroundStyle(Theme.textSecondary)
             }
         }
     }
@@ -222,9 +222,9 @@ private struct GlanceTile: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: systemImage).font(.title3).foregroundStyle(Theme.accent).frame(width: 28)
+            Image(systemName: systemImage).font(PulseFont.ui(.title3)).foregroundStyle(Theme.accent).frame(width: 28)
             VStack(alignment: .leading, spacing: 2) {
-                Text(label).font(.caption).foregroundStyle(Theme.textSecondary)
+                Text(label).font(PulseFont.ui(.caption)).foregroundStyle(Theme.textSecondary)
                 Text(value).font(PulseFont.label(.subheadline)).fontWeight(.semibold).foregroundStyle(Theme.text).lineLimit(1).minimumScaleFactor(0.8)
             }
             Spacer(minLength: 0)
@@ -246,7 +246,7 @@ struct MetaRow: View {
             Spacer()
             Text(value).foregroundStyle(Theme.text).multilineTextAlignment(.trailing)
         }
-        .font(.subheadline)
+        .font(PulseFont.ui(.subheadline))
         .padding(.horizontal, 16).frame(minHeight: 44)
         .accessibilityElement(children: .combine)
     }
@@ -263,7 +263,7 @@ struct LinkRow: View {
                 Spacer()
                 Image(systemName: "arrow.up.right").foregroundStyle(Theme.accentSoft)
             }
-            .font(.subheadline)
+            .font(PulseFont.ui(.subheadline))
             .padding(.horizontal, 16).frame(minHeight: 44)
         }
     }

@@ -18,6 +18,7 @@ public struct PulseRootView: View {
             Theme.bg.ignoresSafeArea()
             phaseContent
                 .transition(.opacity.combined(with: .scale(scale: 1.02)))
+            IrisOverlay(closed: coordinator.irisClosed).zIndex(20)
             if shieldVisible { PrivacyShield().transition(.opacity).zIndex(10) }
         }
         .animation(PulseMotion.gentleSpring, value: session.phase)

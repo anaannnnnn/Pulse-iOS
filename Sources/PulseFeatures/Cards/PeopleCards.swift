@@ -24,7 +24,7 @@ struct PerformerBubble: View {
                         }
                     }
                 Text(performer.name)
-                    .font(.caption.weight(.semibold))
+                    .font(PulseFont.ui(.caption, weight: .semibold))
                     .foregroundStyle(Theme.text)
                     .lineLimit(1)
                     .frame(width: diameter + 14)
@@ -49,13 +49,13 @@ struct PerformerCard: View {
                     .overlay(alignment: .bottomLeading) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(performer.name).font(PulseFont.display(15, relativeTo: .subheadline)).foregroundStyle(.white).lineLimit(1)
-                            Text("\(performer.sceneCount) scenes").font(.caption2).foregroundStyle(.white.opacity(0.8))
+                            Text("\(performer.sceneCount) scenes").font(PulseFont.ui(.caption2)).foregroundStyle(.white.opacity(0.8))
                         }
                         .padding(12)
                     }
                     .overlay(alignment: .topTrailing) {
                         if hub.isFavorite(performer) {
-                            Image(systemName: "heart.fill").font(.caption.weight(.bold)).foregroundStyle(Theme.ember)
+                            Image(systemName: "heart.fill").font(PulseFont.ui(.caption, weight: .bold)).foregroundStyle(Theme.ember)
                                 .padding(8)
                         }
                     }
@@ -82,10 +82,10 @@ struct StudioCard: View {
                 .frame(width: 56, height: 56)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(studio.name).font(PulseFont.label(.body)).fontWeight(.semibold).foregroundStyle(Theme.text)
-                    Text("\(studio.sceneCount) scenes").font(.caption).foregroundStyle(Theme.textSecondary)
+                    Text("\(studio.sceneCount) scenes").font(PulseFont.ui(.caption)).foregroundStyle(Theme.textSecondary)
                 }
                 Spacer()
-                Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(Theme.textTertiary)
+                Image(systemName: "chevron.right").font(PulseFont.ui(.footnote, weight: .semibold)).foregroundStyle(Theme.textTertiary)
             }
             .padding(12)
             .background(Theme.surface, in: .rect(cornerRadius: Theme.Radius.card, style: .continuous))

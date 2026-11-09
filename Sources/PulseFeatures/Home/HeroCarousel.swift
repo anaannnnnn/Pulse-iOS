@@ -99,14 +99,14 @@ private struct HeroSlide: View {
                         .lineLimit(1)
                 }
                 Text(video.title)
-                    .font(.system(.largeTitle, design: .serif, weight: .bold))
+                    .font(PulseFont.display(.largeTitle, weight: .bold))
                     .foregroundStyle(.white)
                     .lineLimit(3)
-                    .minimumScaleFactor(0.7)
+                    .minimumScaleFactor(0.55)
                     .fixedSize(horizontal: false, vertical: true)
                     .shadow(color: .black.opacity(0.5), radius: 12, y: 2)
                 if !castLine.isEmpty {
-                    Text(castLine).font(.subheadline.weight(.medium)).foregroundStyle(.white.opacity(0.85)).lineLimit(1)
+                    Text(castLine).font(PulseFont.ui(.subheadline, weight: .medium)).foregroundStyle(.white.opacity(0.85)).lineLimit(1)
                 }
                 actions.padding(.top, 6)
                 Color.clear.frame(height: 26)

@@ -149,34 +149,57 @@ public extension Color {
     }
 }
 
-/// System fonts only: SF Pro for UI and titles, New York for editorial moments.
+/// Three bundled faces, all variable and all scaling with Dynamic Type:
+/// Bodoni Moda (title-card display), Hanken Grotesk (interface), Martian Mono (timecodes and counters).
 public enum PulseFont {
-    public static func display(_ size: CGFloat, relativeTo style: Font.TextStyle = .title, weight: Font.Weight = .bold) -> Font {
-        .system(size: size, weight: weight)
+    static let displayFamily = "Bodoni Moda"
+    static let displayItalic = "BodoniModa-Italic"
+    static let uiFamily = "Hanken Grotesk"
+    static let monoFace = "MartianMono-SemiExpandedRegular"
+
+    /// Default point size of a text style at the standard Dynamic Type setting.
+    static func base(_ style: Font.TextStyle) -> CGFloat {
+        switch style {
+        case .largeTitle: 34
+        case .title: 28
+        case .title2: 22
+        case .title3: 20
+        case .headline: 17
+        case .subheadline: 15
+        case .body: 17
+        case .callout: 16
+        case .footnote: 13
+        case .caption: 12
+        case .caption2: 11
+        default: 17
+        }
     }
 
-    public static func serif(_ size: CGFloat, relativeTo style: Font.TextStyle = .title, italic: Bool = false) -> Font {
-        let font = Font.system(size: size, weight: .regular, design: .serif)
-        return italic ? font.italic() : font
+    /// Title-card display face. `scale` enlarges it relative to the text style (hero titles use 1.5 and up).
+    public static func display(_ style: Font.TextStyle = .largeTitle, scale: CGFloat = 1, weight: Font.Weight = .semibold, italic: Bool = true) -> Font {
+        .custom(italic ? displayItalic : displayFamily, size: base(style) * scale, relativeTo: style).weight(weight)
     }
 
-    public static func title(_ style: Font.TextStyle = .title2) -> Font {
-        .system(style, weight: .bold)
+    /// Interface text in Hanken Grotesk.
+    public static func ui(_ style: Font.TextStyle = .body, weight: Font.Weight = .regular) -> Font {
+        .custom(uiFamily, size: base(style), relativeTo: style).weight(weight)
     }
 
-    public static func label(_ style: Font.TextStyle = .subheadline) -> Font {
-        .system(style, weight: .semibold)
-    }
-
-    /// Editorial title: New York serif, scales with Dynamic Type.
-    public static func headline(_ style: Font.TextStyle = .title2, weight: Font.Weight = .semibold) -> Font {
-        .system(style, design: .serif, weight: weight)
-    }
-
-    /// Timecodes, runtimes and counters: monospaced digits so numbers never jitter.
+    /// Timecodes, runtimes and counters in Martian Mono.
     public static func timecode(_ style: Font.TextStyle = .caption) -> Font {
-        .system(style, design: .monospaced, weight: .medium)
+        .custom(monoFace, size: base(style) * 0.92, relativeTo: style).weight(.medium)
     }
+
+    // Older call sites.
+    public static func display(_ size: CGFloat, relativeTo style: Font.TextStyle = .title, weight: Font.Weight = .bold) -> Font {
+        .custom(displayItalic, size: size, relativeTo: style).weight(weight)
+    }
+    public static func serif(_ size: CGFloat, relativeTo style: Font.TextStyle = .title, italic: Bool = false) -> Font {
+        .custom(italic ? displayItalic : displayFamily, size: size, relativeTo: style)
+    }
+    public static func title(_ style: Font.TextStyle = .title2) -> Font { ui(style, weight: .bold) }
+    public static func label(_ style: Font.TextStyle = .subheadline) -> Font { ui(style, weight: .semibold) }
+    public static func headline(_ style: Font.TextStyle = .title2, weight: Font.Weight = .semibold) -> Font { display(style, weight: weight) }
 }
 
 extension EnvironmentValues {

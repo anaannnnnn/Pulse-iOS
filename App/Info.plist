@@ -21,6 +21,13 @@
     <dict>
         <key>UIColorName</key><string>LaunchBackground</string>
     </dict>
+    <key>UIAppFonts</key>
+    <array>
+        <string>BodoniModa-VF.ttf</string>
+        <string>BodoniModa-Italic-VF.ttf</string>
+        <string>HankenGrotesk-VF.ttf</string>
+        <string>MartianMono-VF.ttf</string>
+    </array>
     <key>UIBackgroundModes</key>
     <array><string>audio</string></array>
     <key>UIRequiredDeviceCapabilities</key>

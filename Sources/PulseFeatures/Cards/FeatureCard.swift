@@ -18,13 +18,9 @@ struct FeatureCard: View {
         NavigationLink(value: Route.scene(scene)) {
             HStack(alignment: .bottom, spacing: -posterWidth * 0.12) {
                 Text("\(rank)")
-                    .font(.system(size: posterHeight * 0.92, weight: .black))
+                    .font(.custom(PulseFont.displayItalic, size: posterHeight * 0.95).weight(.black))
                     .tracking(rank >= 10 ? -posterHeight * 0.12 : 0)
-                    .foregroundStyle(.black)
-                    .shadow(color: .white, radius: 0, x: 2, y: 0)
-                    .shadow(color: .white, radius: 0, x: -2, y: 0)
-                    .shadow(color: .white, radius: 0, x: 0, y: 2)
-                    .shadow(color: .white, radius: 0, x: 0, y: -2)
+                    .foregroundStyle(LinearGradient(colors: [Theme.accentSoft, Theme.accentDeep.opacity(0.35)], startPoint: .top, endPoint: .bottom))
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
                     .frame(width: numberWidth, height: posterHeight, alignment: .bottomTrailing)
@@ -36,7 +32,7 @@ struct FeatureCard: View {
                         LinearGradient(colors: [.clear, .black.opacity(0.8)], startPoint: .center, endPoint: .bottom).allowsHitTesting(false)
                     }
                     .overlay(alignment: .bottomLeading) {
-                        Text(scene.title).font(.system(.caption, weight: .bold)).foregroundStyle(.white)
+                        Text(scene.title).font(PulseFont.ui(.caption, weight: .bold)).foregroundStyle(.white)
                             .lineLimit(2).padding(.horizontal, 8).padding(.bottom, 8)
                     }
                     .clipShape(.rect(cornerRadius: Theme.Radius.card, style: .continuous))

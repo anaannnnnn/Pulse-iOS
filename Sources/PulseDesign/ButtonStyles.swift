@@ -9,7 +9,7 @@ public struct PulsePrimaryButtonStyle: ButtonStyle {
 
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(.headline, weight: .bold))
+            .font(PulseFont.ui(.headline, weight: .bold))
             .foregroundStyle(isEnabled ? Theme.onAccent : Theme.textTertiary)
             .padding(.horizontal, 22)
             .frame(minHeight: 50)
@@ -31,7 +31,7 @@ public struct PulseGlassButtonStyle: ButtonStyle {
 
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(.subheadline, weight: .semibold))
+            .font(PulseFont.ui(.subheadline, weight: .semibold))
             .foregroundStyle(Theme.text)
             .padding(.horizontal, 20)
             .frame(minHeight: 48)

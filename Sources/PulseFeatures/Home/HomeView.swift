@@ -123,11 +123,11 @@ public struct HomeView: View {
     private func metric(_ value: Int, _ label: LocalizedStringKey) -> some View {
         VStack(spacing: 4) {
             CountUpText(value, compact: true)
-                .font(.system(.title2, design: .monospaced, weight: .medium))
+                .font(PulseFont.timecode(.title2))
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
                 .foregroundStyle(Theme.text)
-            Text(label).font(.caption).foregroundStyle(Theme.textSecondary).lineLimit(1)
+            Text(label).font(PulseFont.ui(.caption)).foregroundStyle(Theme.textSecondary).lineLimit(1)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)

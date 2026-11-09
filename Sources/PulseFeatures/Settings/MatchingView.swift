@@ -42,8 +42,8 @@ struct MatchingView: View {
                         HStack(spacing: 12) {
                             PulseArt(video.poster ?? video.thumb, seed: video.id).frame(width: 84, height: 52).clipShape(.rect(cornerRadius: 10, style: .continuous))
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(video.title).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text).lineLimit(2)
-                                Text(video.matchStatus.rawValue.capitalized).font(.caption).foregroundStyle(Theme.warning)
+                                Text(video.title).font(PulseFont.ui(.subheadline, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
+                                Text(video.matchStatus.rawValue.capitalized).font(PulseFont.ui(.caption)).foregroundStyle(Theme.warning)
                             }
                         }
                     }
@@ -64,12 +64,12 @@ struct MatchingView: View {
             HStack {
                 Text(job.state == .running ? (job.paused ? "Paused" : "Matching…") : "Idle").font(PulseFont.headline(.title3))
                 Spacer()
-                if job.state == .running, job.rate > 0 { Text("\(Int(job.rate))/min").font(.caption.monospacedDigit()).foregroundStyle(Theme.textSecondary) }
+                if job.state == .running, job.rate > 0 { Text("\(Int(job.rate))/min").font(PulseFont.timecode(.caption)).foregroundStyle(Theme.textSecondary) }
             }
             if job.state == .running {
                 ProgressView(value: job.fraction).tint(Theme.accent)
-                if let current = job.current { Text(current.title).font(.caption).foregroundStyle(Theme.textSecondary).lineLimit(1) }
-                if let eta = Format.eta(job.etaSeconds) { Text("About \(eta) left").font(.caption).foregroundStyle(Theme.textSecondary) }
+                if let current = job.current { Text(current.title).font(PulseFont.ui(.caption)).foregroundStyle(Theme.textSecondary).lineLimit(1) }
+                if let eta = Format.eta(job.etaSeconds) { Text("About \(eta) left").font(PulseFont.ui(.caption)).foregroundStyle(Theme.textSecondary) }
             }
             HStack(spacing: 18) {
                 stat(job.matched, "Matched", Theme.success)
@@ -77,15 +77,15 @@ struct MatchingView: View {
                 stat(job.failed, "Failed", Theme.danger)
                 stat(job.queued, "Queued", Theme.textSecondary)
             }
-            if let error = job.lastError { Text(error).font(.caption).foregroundStyle(Theme.danger) }
+            if let error = job.lastError { Text(error).font(PulseFont.ui(.caption)).foregroundStyle(Theme.danger) }
         }
         .padding(.vertical, 4)
     }
 
     private func stat(_ value: Int, _ label: LocalizedStringKey, _ color: Color) -> some View {
         VStack(spacing: 2) {
-            Text(value, format: .number).font(.headline.monospacedDigit()).foregroundStyle(color).contentTransition(.numericText())
-            Text(label).font(.caption2).foregroundStyle(Theme.textSecondary)
+            Text(value, format: .number).font(PulseFont.timecode(.headline)).foregroundStyle(color).contentTransition(.numericText())
+            Text(label).font(PulseFont.ui(.caption2)).foregroundStyle(Theme.textSecondary)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
@@ -118,7 +118,7 @@ struct SourcesSettingsView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(provider.label).font(PulseFont.headline(.title3))
                     Text(source?.configured == true ? "Key configured" : "No key on the server")
-                        .font(.caption).foregroundStyle(source?.configured == true ? Theme.success : Theme.warning)
+                        .font(PulseFont.ui(.caption)).foregroundStyle(source?.configured == true ? Theme.success : Theme.warning)
                 }
             }
             .disabled(source?.configured != true)
@@ -129,7 +129,7 @@ struct SourcesSettingsView: View {
                 .buttonStyle(.borderless)
                 if let result = stores.matching.tests[provider] {
                     Label(result.ok ? "Working" : (result.hint ?? "Failed"), systemImage: result.ok ? "checkmark.circle.fill" : "xmark.octagon.fill")
-                        .font(.caption).foregroundStyle(result.ok ? Theme.success : Theme.danger).lineLimit(2)
+                        .font(PulseFont.ui(.caption)).foregroundStyle(result.ok ? Theme.success : Theme.danger).lineLimit(2)
                 }
             }
         }
@@ -173,7 +173,7 @@ struct AboutView: View {
             Section {
                 VStack(spacing: 12) {
                     PulseMark(size: 40)
-                    Text("A private streaming app for your own library.").font(.footnote).foregroundStyle(Theme.textSecondary)
+                    Text("A private streaming app for your own library.").font(PulseFont.ui(.footnote)).foregroundStyle(Theme.textSecondary)
                 }
                 .frame(maxWidth: .infinity).padding(.vertical, 12)
             }

@@ -88,9 +88,9 @@ private struct TonightRow: View {
                 .clipShape(.rect(cornerRadius: Theme.Radius.card, style: .continuous))
                 .overlay { Image(systemName: "play.fill").foregroundStyle(.white).frame(width: 36, height: 36).pulseGlass(in: Circle()) }
             VStack(alignment: .leading, spacing: 4) {
-                Text(video.title).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text).lineLimit(2)
+                Text(video.title).font(PulseFont.ui(.subheadline, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
                 Text([video.studio?.name, Format.runtime(video.duration)].compactMap { $0 }.joined(separator: " · "))
-                    .font(.caption).foregroundStyle(Theme.textSecondary)
+                    .font(PulseFont.ui(.caption)).foregroundStyle(Theme.textSecondary)
             }
             Spacer(minLength: 0)
         }

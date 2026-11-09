@@ -50,7 +50,7 @@ struct TorboxView: View {
     @ViewBuilder
     private func link(_ store: TorboxStore) -> some View {
         Section {
-            Text("Link your TorBox account to stream cached torrents and add them to your Pulse library.").font(.subheadline).foregroundStyle(Theme.textSecondary)
+            Text("Link your TorBox account to stream cached torrents and add them to your Pulse library.").font(PulseFont.ui(.subheadline)).foregroundStyle(Theme.textSecondary)
             SecureField("TorBox API key", text: $apiKey).textInputAutocapitalization(.never).autocorrectionDisabled()
             Button("Link account") { Task { await store.link(apiKey: apiKey.isEmpty ? nil : apiKey); apiKey = "" } }
                 .disabled(store.busy)
@@ -64,7 +64,7 @@ private struct TorboxRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(item.name).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text).lineLimit(2)
+            Text(item.name).font(PulseFont.ui(.subheadline, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
             ProgressView(value: min(max(item.progress, 0), 1)).tint(item.ready ? Theme.success : Theme.accent)
             HStack(spacing: 8) {
                 Text(Format.bytes(item.size))
@@ -74,7 +74,7 @@ private struct TorboxRow: View {
                 Spacer()
                 if let seeds = item.seeds { Label("\(seeds)", systemImage: "arrow.up.circle").labelStyle(.titleAndIcon) }
             }
-            .font(.caption.monospacedDigit()).foregroundStyle(Theme.textSecondary)
+            .font(PulseFont.timecode(.caption)).foregroundStyle(Theme.textSecondary)
         }
         .padding(.vertical, 4)
         .contextMenu {

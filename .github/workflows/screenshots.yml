@@ -68,7 +68,6 @@ jobs:
             xcrun simctl shutdown "$UDID" || true
           }
           run_device pro 'iPhone 1[0-9] Pro$' large
-          run_device se 'iPhone SE' extra-large
           run_device max 'iPhone 1[0-9] Pro Max' accessibility-large
           ls -l shots
 

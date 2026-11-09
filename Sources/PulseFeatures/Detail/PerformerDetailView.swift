@@ -53,7 +53,7 @@ struct PerformerDetailView: View {
                     .shadow(color: Theme.accent.opacity(0.4), radius: 24, y: 10)
                 Text(detail.performer.name).font(PulseFont.display(24, relativeTo: .title)).foregroundStyle(Theme.text).multilineTextAlignment(.center)
                 if !detail.aliases.isEmpty {
-                    Text("aka " + detail.aliases.prefix(3).joined(separator: ", ")).font(.footnote).foregroundStyle(Theme.textSecondary)
+                    Text("aka " + detail.aliases.prefix(3).joined(separator: ", ")).font(PulseFont.ui(.footnote)).foregroundStyle(Theme.textSecondary)
                 }
                 HStack(spacing: 8) {
                     Chip("\(detail.scenes.count) scenes", systemImage: "play.rectangle")
@@ -75,7 +75,7 @@ struct PerformerDetailView: View {
             if let bio = detail.bio, !bio.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("About").font(PulseFont.headline(.title3)).foregroundStyle(Theme.text)
-                    Text(bio).font(.body).foregroundStyle(Theme.textSecondary).lineSpacing(3)
+                    Text(bio).font(PulseFont.ui(.body)).foregroundStyle(Theme.textSecondary).lineSpacing(3)
                 }
                 .padding(.horizontal, Theme.Space.page)
             }
@@ -141,7 +141,7 @@ struct StudioDetailView: View {
                 VStack(alignment: .leading, spacing: 22) {
                     VStack(alignment: .leading, spacing: 10) {
                         Text(detail.studio.name).font(PulseFont.display(28, relativeTo: .largeTitle)).foregroundStyle(Theme.text)
-                        if let parent = detail.studio.parent { Text(parent).font(.subheadline).foregroundStyle(Theme.textSecondary) }
+                        if let parent = detail.studio.parent { Text(parent).font(PulseFont.ui(.subheadline)).foregroundStyle(Theme.textSecondary) }
                         HStack {
                             Chip("\(detail.scenes.count) scenes", systemImage: "play.rectangle")
                             Button {

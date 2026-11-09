@@ -76,7 +76,7 @@ public struct SettingsView: View {
             PulseMark(size: 24, showsWordmark: false)
             VStack(alignment: .leading, spacing: 3) {
                 Text(session.isDemo ? "Demo library" : (session.email.isEmpty ? "Signed in" : session.email)).font(PulseFont.headline(.title3)).foregroundStyle(Theme.text).lineLimit(1)
-                Text(session.isDemo ? "Sample data, no account needed" : (session.serverURL.host() ?? "Pulse")).font(.footnote).foregroundStyle(Theme.success)
+                Text(session.isDemo ? "Sample data, no account needed" : (session.serverURL.host() ?? "Pulse")).font(PulseFont.ui(.footnote)).foregroundStyle(Theme.success)
             }
             Spacer()
             Circle().fill(Theme.success).frame(width: 8, height: 8)

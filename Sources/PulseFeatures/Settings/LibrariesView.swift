@@ -42,7 +42,7 @@ struct LibrariesView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Where your videos come from").font(PulseFont.title(.title3)).foregroundStyle(Theme.text)
             Text("Connect each platform once. Pulse scans the folders you pick, matches artwork and details, and keeps everything in one library.")
-                .font(.subheadline).foregroundStyle(Theme.textSecondary)
+                .font(PulseFont.ui(.subheadline)).foregroundStyle(Theme.textSecondary)
             if let totals = stores.library.facets?.totals {
                 HStack(spacing: 8) {
                     Chip("\(totals.scenes) videos", systemImage: "play.rectangle")
@@ -68,14 +68,14 @@ struct LibrariesView: View {
                 if let quota = store.status?.quota, quota > 0 {
                     ProgressView(value: store.status?.usedFraction ?? 0).tint(Color(hex: 0x17BED0))
                     Text("\(Format.bytes(Int64(store.status?.usedQuota ?? 0))) of \(Format.bytes(Int64(quota))) used")
-                        .font(.caption).foregroundStyle(Theme.textSecondary)
+                        .font(PulseFont.ui(.caption)).foregroundStyle(Theme.textSecondary)
                 }
                 Label(store.folders.isEmpty ? "Whole account" : "\(store.folders.count) folders", systemImage: "folder.fill")
-                    .font(.caption).foregroundStyle(Theme.textSecondary)
+                    .font(PulseFont.ui(.caption)).foregroundStyle(Theme.textSecondary)
                 if store.scan.state == .running {
                     HStack(spacing: 8) {
                         ProgressView().controlSize(.small)
-                        Text("Scanning · \(store.scan.videosFound) videos found").font(.caption.monospacedDigit()).foregroundStyle(Theme.accentSoft)
+                        Text("Scanning · \(store.scan.videosFound) videos found").font(PulseFont.timecode(.caption)).foregroundStyle(Theme.accentSoft)
                     }
                 }
             }
@@ -94,7 +94,7 @@ struct LibrariesView: View {
             if linked {
                 let ready = store.items.filter(\.ready).count
                 Label("\(store.items.count) downloads · \(ready) ready", systemImage: "arrow.down.to.line")
-                    .font(.caption).foregroundStyle(Theme.textSecondary)
+                    .font(PulseFont.ui(.caption)).foregroundStyle(Theme.textSecondary)
             }
         }
     }
@@ -150,12 +150,12 @@ private struct PlatformCard<Extra: View>: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 14) {
                     Image(systemName: systemImage)
-                        .font(.title2).foregroundStyle(tint)
+                        .font(PulseFont.ui(.title2)).foregroundStyle(tint)
                         .frame(width: 52, height: 52)
                         .background(tint.opacity(0.16), in: .rect(cornerRadius: 16, style: .continuous))
                     VStack(alignment: .leading, spacing: 3) {
                         Text(title).font(PulseFont.headline(.title3)).foregroundStyle(Theme.text)
-                        Text(detail).font(.footnote).foregroundStyle(Theme.textSecondary).lineLimit(2)
+                        Text(detail).font(PulseFont.ui(.footnote)).foregroundStyle(Theme.textSecondary).lineLimit(2)
                     }
                     Spacer(minLength: 0)
                     Chip(connected ? "Connected" : "Add", systemImage: connected ? "checkmark.circle.fill" : "plus",

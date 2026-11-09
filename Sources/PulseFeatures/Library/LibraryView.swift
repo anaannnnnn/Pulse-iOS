@@ -61,7 +61,7 @@ public struct LibraryView: View {
     private var summary: some View {
         HStack {
             Text("\(stores.library.total) videos")
-                .font(.footnote.weight(.semibold)).foregroundStyle(Theme.textSecondary)
+                .font(PulseFont.ui(.footnote, weight: .semibold)).foregroundStyle(Theme.textSecondary)
                 .contentTransition(.numericText())
                 .animation(.smooth, value: stores.library.total)
             Spacer()
@@ -130,9 +130,9 @@ public struct LibraryView: View {
         Button(action: remove) {
             HStack(spacing: 6) {
                 Text(title)
-                Image(systemName: "xmark").font(.caption2.weight(.bold))
+                Image(systemName: "xmark").font(PulseFont.ui(.caption2, weight: .bold))
             }
-            .font(.caption.weight(.semibold))
+            .font(PulseFont.ui(.caption, weight: .semibold))
             .foregroundStyle(Theme.text)
             .padding(.horizontal, 12).frame(minHeight: 34)
             .pulseCapsuleGlass(tint: Theme.accent.opacity(0.4))

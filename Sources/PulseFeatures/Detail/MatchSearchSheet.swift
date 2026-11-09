@@ -64,11 +64,11 @@ private struct CandidateRow: View {
                     .frame(width: 96, height: 60)
                     .clipShape(.rect(cornerRadius: 10, style: .continuous))
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(candidate.title).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text).lineLimit(2)
+                    Text(candidate.title).font(PulseFont.ui(.subheadline, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
                     Text([candidate.studio, candidate.date].compactMap { $0 }.joined(separator: " · "))
-                        .font(.caption).foregroundStyle(Theme.textSecondary).lineLimit(1)
+                        .font(PulseFont.ui(.caption)).foregroundStyle(Theme.textSecondary).lineLimit(1)
                     if !candidate.performers.isEmpty {
-                        Text(candidate.performers.prefix(3).joined(separator: ", ")).font(.caption2).foregroundStyle(Theme.textTertiary).lineLimit(1)
+                        Text(candidate.performers.prefix(3).joined(separator: ", ")).font(PulseFont.ui(.caption2)).foregroundStyle(Theme.textTertiary).lineLimit(1)
                     }
                     HStack(spacing: 6) {
                         Chip(LocalizedStringKey((candidate.source ?? .tpdb).label))
@@ -78,7 +78,7 @@ private struct CandidateRow: View {
                 Spacer(minLength: 0)
                 ZStack {
                     ProgressRing(candidate.confidence, lineWidth: 3)
-                    Text(Format.percent(candidate.confidence)).font(.caption2.weight(.bold).monospacedDigit()).foregroundStyle(Theme.text)
+                    Text(Format.percent(candidate.confidence)).font(PulseFont.timecode(.caption2)).foregroundStyle(Theme.text)
                 }
                 .frame(width: 44, height: 44)
             }

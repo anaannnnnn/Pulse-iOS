@@ -63,7 +63,7 @@ struct BrowseTiles: View {
             }
             .overlay(alignment: .bottomLeading) {
                 Text(category.title)
-                    .font(.system(.headline, design: .serif, weight: .bold))
+                    .font(PulseFont.display(.headline, weight: .bold))
                     .foregroundStyle(.white)
                     .lineLimit(2)
                     .shadow(color: .black.opacity(0.4), radius: 6, y: 1)

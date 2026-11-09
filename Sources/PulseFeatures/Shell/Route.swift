@@ -1,6 +1,7 @@
 #if canImport(SwiftUI) && canImport(UIKit)
 import Observation
 import SwiftUI
+import UIKit
 import PulseCore
 
 public enum Route: Hashable {
@@ -24,10 +25,22 @@ public final class PlayerCoordinator {
     public var showLibraries = false
     public var settingsOpen = false
     public var tab: AppTab = .home
+    /// True while the "lights down" iris is closed over the app, just before the player appears.
+    public var irisClosed = false
 
     public init() {}
 
-    public func play(_ scene: Video) { self.scene = scene }
+    /// Closes an iris to black, presents the player behind it, then lets the iris open again.
+    public func play(_ scene: Video) {
+        guard !UIAccessibility.isReduceMotionEnabled else { self.scene = scene; return }
+        irisClosed = true
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(430))
+            self.scene = scene
+            try? await Task.sleep(for: .milliseconds(450))
+            self.irisClosed = false
+        }
+    }
 
     /// Jump to Settings → Libraries (used by empty-state buttons).
     public func openLibraries() {

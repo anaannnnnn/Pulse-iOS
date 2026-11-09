@@ -58,7 +58,7 @@ public struct SearchView: View {
                 .foregroundStyle(focused ? Theme.accent : Theme.textSecondary)
                 .symbolEffect(.bounce, value: focused)
             TextField("Videos, performers, studios", text: $text)
-                .font(.system(.body, weight: .medium))
+                .font(PulseFont.ui(.body, weight: .medium))
                 .foregroundStyle(Theme.text)
                 .tint(Theme.accent)
                 .focused($focused)
@@ -92,12 +92,12 @@ public struct SearchView: View {
                         Text("Recent").font(PulseFont.headline(.title2)).foregroundStyle(Theme.text)
                         Spacer()
                         Button("Clear") { recents = []; UserDefaults.standard.removeObject(forKey: "pulse.recentSearches") }
-                            .font(.footnote.weight(.semibold)).foregroundStyle(Theme.accent)
+                            .font(PulseFont.ui(.footnote, weight: .semibold)).foregroundStyle(Theme.accent)
                     }
                     FlowLayout(spacing: 8) {
                         ForEach(recents, id: \.self) { term in
                             Button { text = term } label: {
-                                Label(term, systemImage: "clock.arrow.circlepath").font(.footnote.weight(.semibold)).foregroundStyle(Theme.text)
+                                Label(term, systemImage: "clock.arrow.circlepath").font(PulseFont.ui(.footnote, weight: .semibold)).foregroundStyle(Theme.text)
                                     .padding(.horizontal, 12).frame(minHeight: 36).pulsePill()
                             }
                         }

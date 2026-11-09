@@ -60,8 +60,8 @@ public struct Chip: View {
 
     public var body: some View {
         HStack(spacing: 5) {
-            if let systemImage { Image(systemName: systemImage).font(.caption2.weight(.bold)) }
-            Text(text).font(.caption.weight(.semibold))
+            if let systemImage { Image(systemName: systemImage).font(PulseFont.ui(.caption2, weight: .bold)) }
+            Text(text).font(PulseFont.ui(.caption, weight: .semibold))
         }
         .foregroundStyle(tint ?? Theme.text)
         .padding(.horizontal, 10)
@@ -108,8 +108,8 @@ public struct PulseSegmented<Value: Hashable>: View {
                     withAnimation(Theme.glide) { selection = option.value }
                 } label: {
                     HStack(spacing: 6) {
-                        if let icon = option.icon { Image(systemName: icon).font(.caption.weight(.bold)) }
-                        Text(option.title).font(.subheadline.weight(.semibold))
+                        if let icon = option.icon { Image(systemName: icon).font(PulseFont.ui(.caption, weight: .bold)) }
+                        Text(option.title).font(PulseFont.ui(.subheadline, weight: .semibold))
                     }
                     .foregroundStyle(selected ? Theme.text : Theme.textSecondary)
                     .frame(maxWidth: .infinity, minHeight: 40)
@@ -148,18 +148,18 @@ public struct SectionHeader: View {
         HStack(alignment: .center, spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 8) {
-                    Text(title).font(PulseFont.headline(.title3, weight: .semibold)).foregroundStyle(Theme.text)
+                    Text(title).font(PulseFont.display(.title2, weight: .semibold)).foregroundStyle(Theme.text)
                     if let count { CountBadge(count) }
                 }
-                if let subtitle { Text(subtitle).font(.footnote).foregroundStyle(Theme.textSecondary) }
+                if let subtitle { Text(subtitle).font(PulseFont.ui(.footnote)).foregroundStyle(Theme.textSecondary) }
             }
             .accessibilityAddTraits(.isHeader)
             Spacer()
             if let action {
                 Button(action: action) {
                     HStack(spacing: 2) {
-                        Text("See all").font(.footnote.weight(.semibold))
-                        Image(systemName: "chevron.right").font(.system(size: 11, weight: .bold))
+                        Text("See all").font(PulseFont.timecode(.caption))
+                        Image(systemName: "arrow.right").font(.system(size: 10, weight: .bold))
                     }
                     .foregroundStyle(Theme.textSecondary)
                     .frame(minHeight: 40)
@@ -194,7 +194,7 @@ public struct EmptyStateView: View {
                 .pulseGlass(in: Circle(), tint: Theme.accent.opacity(0.15))
                 .symbolEffect(.pulse)
             Text(title).font(PulseFont.headline(.title3)).foregroundStyle(Theme.text)
-            Text(message).font(.subheadline).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
+            Text(message).font(PulseFont.ui(.subheadline)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
             if let actionTitle, let action {
                 Button(actionTitle, action: action).buttonStyle(.pulsePrimary).padding(.top, 6)
             }

@@ -220,7 +220,7 @@ struct PlayerView: View {
             ProgressView("Preparing…").tint(.white).foregroundStyle(.white).padding(24).pulseGlass()
         case .failed(let message):
             VStack(spacing: 16) {
-                Image(systemName: "exclamationmark.triangle.fill").font(.largeTitle).foregroundStyle(Theme.warning)
+                Image(systemName: "exclamationmark.triangle.fill").font(PulseFont.ui(.largeTitle)).foregroundStyle(Theme.warning)
                 Text(message).foregroundStyle(.white).multilineTextAlignment(.center)
                 HStack {
                     Button("Try again") { Task { await start() } }.buttonStyle(.pulsePrimary)
@@ -263,7 +263,7 @@ struct PlayerView: View {
                     .buttonStyle(.pulseIcon).accessibilityLabel("Minimise player")
                 VStack(alignment: .leading, spacing: 1) {
                     Text(video.title).font(PulseFont.label(.subheadline)).fontWeight(.bold).foregroundStyle(.white).lineLimit(1)
-                    if let studio = video.studio?.name { Text(studio).font(.caption).foregroundStyle(.white.opacity(0.7)) }
+                    if let studio = video.studio?.name { Text(studio).font(PulseFont.ui(.caption)).foregroundStyle(.white.opacity(0.7)) }
                 }
                 Spacer(minLength: 8)
                 if engine.pipPossible {
@@ -345,7 +345,7 @@ struct PlayerView: View {
                 Spacer()
                 Text("-" + Format.clock(max(engine.duration - engine.currentTime, 0))).monospacedDigit()
             }
-            .font(.caption.weight(.semibold))
+            .font(PulseFont.ui(.caption, weight: .semibold))
             .foregroundStyle(.white.opacity(0.85))
             .padding(.horizontal, 2)
             .accessibilityHidden(true)
@@ -371,9 +371,9 @@ private struct HUDView: View {
 
     var body: some View {
         VStack(spacing: 10) {
-            Image(systemName: hud.symbol).font(.title).foregroundStyle(.white)
+            Image(systemName: hud.symbol).font(PulseFont.ui(.title)).foregroundStyle(.white)
             if hud.symbol.hasPrefix("go") {
-                Text("\(Int(hud.value)) s").font(.headline.monospacedDigit()).foregroundStyle(.white)
+                Text("\(Int(hud.value)) s").font(PulseFont.timecode(.headline)).foregroundStyle(.white)
             } else {
                 Capsule().fill(.white.opacity(0.25)).frame(width: 110, height: 6)
                     .overlay(alignment: .leading) { Capsule().fill(Theme.gradient).frame(width: 110 * hud.value, height: 6) }
@@ -398,8 +398,8 @@ private struct UpNextCard: View {
                 PulseArt(video.poster ?? video.thumb, seed: video.id).frame(width: 110, height: 68)
                     .clipShape(.rect(cornerRadius: 12, style: .continuous))
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Up next in \(countdown)").font(.caption.weight(.semibold)).foregroundStyle(Theme.accentSoft)
-                    Text(video.title).font(.subheadline.weight(.bold)).foregroundStyle(.white).lineLimit(2)
+                    Text("Up next in \(countdown)").font(PulseFont.ui(.caption, weight: .semibold)).foregroundStyle(Theme.accentSoft)
+                    Text(video.title).font(PulseFont.ui(.subheadline, weight: .bold)).foregroundStyle(.white).lineLimit(2)
                 }
                 Spacer(minLength: 0)
                 Button("Play", action: play).buttonStyle(.pulsePrimary)

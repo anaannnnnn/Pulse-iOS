@@ -35,16 +35,16 @@ struct PcloudSettingsView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     ProgressView(value: store.status?.usedFraction ?? 0).tint(Theme.accent)
                     Text("\(Format.bytes(Int64(store.status?.usedQuota ?? 0))) of \(Format.bytes(Int64(quota))) used")
-                        .font(.footnote).foregroundStyle(Theme.textSecondary)
+                        .font(PulseFont.ui(.footnote)).foregroundStyle(Theme.textSecondary)
                 }
             }
         }
         Section {
             Button("Choose folders to scan", systemImage: "folder.badge.gearshape") { picking = true }
             if store.folders.isEmpty {
-                Text("Scanning your whole account").font(.footnote).foregroundStyle(Theme.textSecondary)
+                Text("Scanning your whole account").font(PulseFont.ui(.footnote)).foregroundStyle(Theme.textSecondary)
             } else {
-                ForEach(store.folders) { Label($0.path ?? $0.name ?? "Folder", systemImage: "folder.fill").font(.footnote) }
+                ForEach(store.folders) { Label($0.path ?? $0.name ?? "Folder", systemImage: "folder.fill").font(PulseFont.ui(.footnote)) }
             }
         } header: { Text("Folders") }
         Section("Scan") {
@@ -62,15 +62,15 @@ struct PcloudSettingsView: View {
         switch scan.state {
         case .running:
             VStack(alignment: .leading, spacing: 6) {
-                HStack { ProgressView(); Text("Scanning…").font(.subheadline.weight(.semibold)) }
-                if let path = scan.currentPath { Text(path).font(.caption).foregroundStyle(Theme.textSecondary).lineLimit(1) }
-                Text("\(scan.filesSeen) files · \(scan.videosFound) videos · \(scan.added) new").font(.caption.monospacedDigit()).foregroundStyle(Theme.textSecondary)
+                HStack { ProgressView(); Text("Scanning…").font(PulseFont.ui(.subheadline, weight: .semibold)) }
+                if let path = scan.currentPath { Text(path).font(PulseFont.ui(.caption)).foregroundStyle(Theme.textSecondary).lineLimit(1) }
+                Text("\(scan.filesSeen) files · \(scan.videosFound) videos · \(scan.added) new").font(PulseFont.timecode(.caption)).foregroundStyle(Theme.textSecondary)
             }
         case .error:
-            Label(scan.error ?? "The last scan failed.", systemImage: "exclamationmark.triangle.fill").foregroundStyle(Theme.danger).font(.footnote)
+            Label(scan.error ?? "The last scan failed.", systemImage: "exclamationmark.triangle.fill").foregroundStyle(Theme.danger).font(PulseFont.ui(.footnote))
         case .idle:
             if scan.videosFound > 0 {
-                Text("Last scan: \(scan.videosFound) videos, \(scan.added) added, \(scan.removed) removed.").font(.footnote).foregroundStyle(Theme.textSecondary)
+                Text("Last scan: \(scan.videosFound) videos, \(scan.added) added, \(scan.removed) removed.").font(PulseFont.ui(.footnote)).foregroundStyle(Theme.textSecondary)
             }
         }
     }
@@ -79,7 +79,7 @@ struct PcloudSettingsView: View {
     private func connect(_ store: PcloudStore) -> some View {
         Section {
             Text("Pulse streams the videos in your pCloud. Sign in once on pCloud's own page, copy the code it shows, and paste it below.")
-                .font(.subheadline).foregroundStyle(Theme.textSecondary)
+                .font(PulseFont.ui(.subheadline)).foregroundStyle(Theme.textSecondary)
             Button("Open pCloud sign-in", systemImage: "safari") {
                 Task { if let url = await store.authorizeURL(manual: true) { openURL(url) } }
             }

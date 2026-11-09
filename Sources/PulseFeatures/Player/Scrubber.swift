@@ -34,7 +34,7 @@ struct Scrubber: View {
                     .offset(x: width * fraction - (active ? 11 : 7))
                 if active {
                     Text(Format.clock(fraction * duration))
-                        .font(.caption.weight(.bold).monospacedDigit()).foregroundStyle(.white)
+                        .font(PulseFont.timecode(.caption)).foregroundStyle(.white)
                         .padding(.horizontal, 10).padding(.vertical, 5)
                         .pulseCapsuleGlass()
                         .offset(x: min(max(width * fraction - 28, 0), width - 56), y: -34)

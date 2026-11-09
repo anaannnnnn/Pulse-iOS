@@ -26,7 +26,7 @@ public struct ImmersiveSectionHeader: View {
                     .foregroundStyle(.primary)
                 if let subtitle {
                     Text(subtitle)
-                        .font(.subheadline)
+                        .font(PulseFont.ui(.subheadline))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -34,7 +34,7 @@ public struct ImmersiveSectionHeader: View {
             if let actionTitle, let action {
                 Button(action: action) {
                     Text(actionTitle)
-                        .font(.subheadline.weight(.semibold))
+                        .font(PulseFont.ui(.subheadline, weight: .semibold))
                         .foregroundStyle(Theme.accent)
                 }
                 .pulsePress()
@@ -92,7 +92,7 @@ public struct ImmersiveMediaCard: View {
                         .lineLimit(2)
                     if let subtitle {
                         Text(subtitle)
-                            .font(.caption)
+                            .font(PulseFont.ui(.caption))
                             .foregroundStyle(.white.opacity(0.75))
                             .lineLimit(1)
                     }
@@ -123,9 +123,9 @@ public struct ImmersiveRatingPill: View {
     public var body: some View {
         HStack(spacing: 5) {
             Image(systemName: icon)
-                .font(.caption2.weight(.bold))
+                .font(PulseFont.ui(.caption2, weight: .bold))
             Text(text)
-                .font(.caption.weight(.semibold))
+                .font(PulseFont.ui(.caption, weight: .semibold))
         }
         .foregroundStyle(.white)
         .padding(.horizontal, 9)
@@ -196,7 +196,7 @@ public struct ImmersiveEmptyState: View {
 
             if let message {
                 Text(message)
-                    .font(.subheadline)
+                    .font(PulseFont.ui(.subheadline))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
@@ -204,7 +204,7 @@ public struct ImmersiveEmptyState: View {
             if let actionTitle, let action {
                 Button(action: action) {
                     Text(actionTitle)
-                        .font(.subheadline.weight(.semibold))
+                        .font(PulseFont.ui(.subheadline, weight: .semibold))
                         .padding(.horizontal, 18)
                         .padding(.vertical, 10)
                         .background(Capsule().fill(Theme.accent.opacity(0.18)))
