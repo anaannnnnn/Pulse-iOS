@@ -34,7 +34,7 @@ struct BrowseTiles: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Browse").font(PulseFont.title(.title3)).foregroundStyle(Theme.text)
+            Text("Browse").font(PulseFont.headline(.title2)).foregroundStyle(Theme.text)
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
                 ForEach(categories) { category in
                     NavigationLink(value: Route.filtered(title: category.name, query: category.query)) {
@@ -50,7 +50,7 @@ struct BrowseTiles: View {
 
     private func tile(_ category: Category) -> some View {
         Color.clear
-            .frame(height: 112)
+            .frame(maxWidth: .infinity, minHeight: 112)
             .overlay { PosterArt(seed: category.seed) }
             .overlay { LinearGradient(colors: [.clear, .black.opacity(0.55)], startPoint: .center, endPoint: .bottom) }
             .overlay(alignment: .topTrailing) {
@@ -63,8 +63,9 @@ struct BrowseTiles: View {
             }
             .overlay(alignment: .bottomLeading) {
                 Text(category.title)
-                    .font(.system(size: 17, weight: .bold))
+                    .font(.system(.headline, design: .serif, weight: .bold))
                     .foregroundStyle(.white)
+                    .lineLimit(2)
                     .shadow(color: .black.opacity(0.4), radius: 6, y: 1)
                     .padding(14)
             }

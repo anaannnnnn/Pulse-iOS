@@ -89,7 +89,7 @@ public struct SearchView: View {
             if !recents.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Text("Recent").font(PulseFont.title(.title3)).foregroundStyle(Theme.text)
+                        Text("Recent").font(PulseFont.headline(.title2)).foregroundStyle(Theme.text)
                         Spacer()
                         Button("Clear") { recents = []; UserDefaults.standard.removeObject(forKey: "pulse.recentSearches") }
                             .font(.footnote.weight(.semibold)).foregroundStyle(Theme.accent)

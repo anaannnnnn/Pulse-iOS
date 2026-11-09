@@ -10,13 +10,12 @@ public struct PulsePrimaryButtonStyle: ButtonStyle {
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(.headline, weight: .bold))
-            .foregroundStyle(Theme.onAccent)
+            .foregroundStyle(isEnabled ? Theme.onAccent : Theme.textTertiary)
             .padding(.horizontal, 22)
             .frame(minHeight: 50)
-            .background(Theme.accent, in: Capsule())
-            .overlay(Capsule().strokeBorder(.white.opacity(0.28), lineWidth: 0.8))
-            .shadow(color: Theme.accent.opacity(0.35), radius: 14, y: 6)
-            .opacity(isEnabled ? 1 : 0.45)
+            .background(isEnabled ? Theme.accent : Theme.elevated, in: Capsule())
+            .overlay(Capsule().strokeBorder(.white.opacity(isEnabled ? 0.28 : 0.08), lineWidth: 0.8))
+            .shadow(color: Theme.accent.opacity(isEnabled ? 0.35 : 0), radius: 14, y: 6)
             .brightness(configuration.isPressed ? -0.12 : 0)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(Theme.tap, value: configuration.isPressed)

@@ -1,7 +1,7 @@
 # Pulse for iOS
 
 Native SwiftUI client for the Pulse personal streaming server (pCloud + TorBox library, ThePornDB / StashDB metadata).
-It speaks the server's `/api` contract (`docs/API.md` in the Pulse repo) and mirrors the web app's Violet Glass design.
+It speaks the server's `/api` contract (`docs/API.md` in the Pulse repo) and uses the "screening room" design language (see DESIGN.md).
 
 * iOS 18+ (Liquid Glass automatically on iOS 26+ when built with Xcode 26)
 * Swift 6 package, no third-party dependencies
