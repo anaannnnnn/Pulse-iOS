@@ -36,7 +36,7 @@ struct FeatureCard: View {
                         LinearGradient(colors: [.clear, .black.opacity(0.8)], startPoint: .center, endPoint: .bottom).allowsHitTesting(false)
                     }
                     .overlay(alignment: .bottomLeading) {
-                        Text(scene.title).font(.system(size: 12, weight: .bold)).foregroundStyle(.white)
+                        Text(scene.title).font(.system(.caption, weight: .bold)).foregroundStyle(.white)
                             .lineLimit(2).padding(.horizontal, 8).padding(.bottom, 8)
                     }
                     .clipShape(.rect(cornerRadius: Theme.Radius.card, style: .continuous))

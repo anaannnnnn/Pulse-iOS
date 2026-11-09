@@ -60,7 +60,7 @@ public struct PulseGlyph: View {
     }
 }
 
-/// Bold crimson wordmark, Netflix-style: tight caps, heavy weight, soft glow.
+/// Wordmark: the projector glyph beside a serif "Pulse". `showsWordmark: false` gives the glyph alone.
 public struct PulseMark: View {
     var size: CGFloat
     var showsWordmark: Bool
@@ -71,14 +71,13 @@ public struct PulseMark: View {
     }
 
     public var body: some View {
-        HStack(spacing: size * 0.35) {
-            if !showsWordmark { PulseGlyph(size: size * 1.6) }
-            else {
-                Text("PULSE")
-                    .font(.system(size: size * 1.4, weight: .black))
-                    .tracking(size * 0.12)
-                    .foregroundStyle(Theme.accent)
-                    .shadow(color: Theme.accent.opacity(0.55), radius: size * 0.5)
+        HStack(spacing: size * 0.18) {
+            PulseGlyph(size: showsWordmark ? size * 1.5 : size * 1.6)
+            if showsWordmark {
+                Text("Pulse")
+                    .font(.system(size: size * 1.35, weight: .semibold, design: .serif))
+                    .tracking(-size * 0.02)
+                    .foregroundStyle(Theme.text)
             }
         }
         .accessibilityElement(children: .ignore)

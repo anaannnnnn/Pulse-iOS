@@ -14,7 +14,7 @@ public enum AccentChoice: String, CaseIterable, Identifiable, Sendable {
         case .jade: "Jade"
         case .ice: "Ice"
         case .rose: "Rose"
-        case .amber: "Amber"
+        case .amber: "Tungsten"
         case .violet: "Violet"
         }
     }
@@ -25,7 +25,7 @@ public enum AccentChoice: String, CaseIterable, Identifiable, Sendable {
         case .jade: 0x5BC0A5
         case .ice: 0x7BA7F5
         case .rose: 0xE88AA3
-        case .amber: 0xE3B260
+        case .amber: 0xF2B24A
         case .violet: 0xA290F2
         }
     }
@@ -36,7 +36,7 @@ public enum AccentChoice: String, CaseIterable, Identifiable, Sendable {
         case .jade: 0x92D6C3
         case .ice: 0xA9C6FA
         case .rose: 0xF1B0C1
-        case .amber: 0xEFCB8F
+        case .amber: 0xFFD27F
         case .violet: 0xC3B8F7
         }
     }
@@ -47,7 +47,7 @@ public enum AccentChoice: String, CaseIterable, Identifiable, Sendable {
         case .jade: 0x2F8A76
         case .ice: 0x3F6FCC
         case .rose: 0xB8506C
-        case .amber: 0xB5842F
+        case .amber: 0xB87A12
         case .violet: 0x6E58C8
         }
     }
@@ -59,12 +59,12 @@ public enum AccentChoice: String, CaseIterable, Identifiable, Sendable {
 @Observable
 public final class AccentStore: @unchecked Sendable {
     public static let shared = AccentStore()
-    private static let key = "pulse.accent.v2"
+    private static let key = "pulse.accent.v3"
 
     public private(set) var choice: AccentChoice
 
     private init() {
-        choice = UserDefaults.standard.string(forKey: Self.key).flatMap(AccentChoice.init(rawValue:)) ?? .netflix
+        choice = UserDefaults.standard.string(forKey: Self.key).flatMap(AccentChoice.init(rawValue:)) ?? .amber
     }
 
     public func select(_ choice: AccentChoice) {
@@ -86,7 +86,12 @@ public enum Theme {
     public static var accentSoft: Color { Color(hex: AccentStore.shared.choice.soft) }
     public static var accentDeep: Color { Color(hex: AccentStore.shared.choice.deep) }
     /// Text and icons that sit on a solid accent fill (rare: progress knobs, badges).
-    public static let onAccent = Color.white
+    public static var onAccent: Color {
+        switch AccentStore.shared.choice {
+        case .netflix, .violet: .white
+        default: Color(hex: 0x140E04)
+        }
+    }
     /// Soft coral for hearts and live states.
     public static let ember = Color(hex: 0xF08A7A)
     public static let success = Color(hex: 0x6FCF97)
@@ -105,9 +110,13 @@ public enum Theme {
     public static let rim = LinearGradient(colors: [.white.opacity(0.30), .white.opacity(0.05), .white.opacity(0.12)], startPoint: .topLeading, endPoint: .bottomTrailing)
 
     public enum Radius {
-        public static let card: CGFloat = 6
-        public static let control: CGFloat = 6
-        public static let sheet: CGFloat = 16
+        /// Posters and thumbnails.
+        public static let card: CGFloat = 10
+        /// Buttons, fields, rows.
+        public static let control: CGFloat = 14
+        /// Grouped panels (slate, settings groups).
+        public static let panel: CGFloat = 20
+        public static let sheet: CGFloat = 28
     }
 
     /// 4-pt grid.
@@ -157,6 +166,16 @@ public enum PulseFont {
 
     public static func label(_ style: Font.TextStyle = .subheadline) -> Font {
         .system(style, weight: .semibold)
+    }
+
+    /// Editorial title: New York serif, scales with Dynamic Type.
+    public static func headline(_ style: Font.TextStyle = .title2, weight: Font.Weight = .semibold) -> Font {
+        .system(style, design: .serif, weight: weight)
+    }
+
+    /// Timecodes, runtimes and counters: monospaced digits so numbers never jitter.
+    public static func timecode(_ style: Font.TextStyle = .caption) -> Font {
+        .system(style, design: .monospaced, weight: .medium)
     }
 }
 

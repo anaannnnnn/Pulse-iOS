@@ -1,9 +1,8 @@
 #if canImport(SwiftUI) && canImport(UIKit)
 import SwiftUI
 
-/// Ink-black stage with a slowly drifting mesh gradient in the accent colour. Static under Reduce Motion or Low Power Mode.
+/// Pure-black house with a faint cone of projector light falling from the top edge. Static: costs nothing per frame.
 public struct AuroraBackground: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var tint: Color?
     var intensity: Double
 
@@ -12,26 +11,13 @@ public struct AuroraBackground: View {
         self.intensity = intensity
     }
 
-    private var isStatic: Bool { reduceMotion || ProcessInfo.processInfo.isLowPowerModeEnabled }
-
     public var body: some View {
         let color = tint ?? Theme.accentDeep
         ZStack {
             Theme.bg
-            TimelineView(.animation(minimumInterval: 1.0 / 20, paused: isStatic)) { context in
-                let t = isStatic ? 0 : Float(context.date.timeIntervalSinceReferenceDate)
-                let a = Float(0.12 * sin(Double(t) * 0.23)), b = Float(0.12 * cos(Double(t) * 0.19))
-                MeshGradient(width: 3, height: 3, points: [
-                    [0, 0], [0.5 + a, 0], [1, 0],
-                    [0, 0.45 + b], [0.5 - b, 0.5 + a], [1, 0.55 - a],
-                    [0, 1], [0.5 + b, 1], [1, 1],
-                ], colors: [
-                    color.opacity(0.34 * intensity), Theme.bg.opacity(0), color.opacity(0.18 * intensity),
-                    Theme.bg.opacity(0), color.opacity(0.14 * intensity), Theme.bg.opacity(0),
-                    Theme.bg.opacity(0), color.opacity(0.10 * intensity), Theme.bg.opacity(0),
-                ])
-            }
-            LinearGradient(colors: [.clear, Theme.bg.opacity(0.85)], startPoint: .center, endPoint: .bottom)
+            RadialGradient(colors: [color.opacity(0.26 * intensity), color.opacity(0.06 * intensity), .clear],
+                           center: UnitPoint(x: 0.5, y: -0.05), startRadius: 0, endRadius: 520)
+            LinearGradient(colors: [.clear, Theme.bg.opacity(0.9)], startPoint: .center, endPoint: .bottom)
         }
         .ignoresSafeArea()
         .accessibilityHidden(true)

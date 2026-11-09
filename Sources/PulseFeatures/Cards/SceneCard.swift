@@ -21,7 +21,7 @@ struct SceneCard: View {
                 artwork
                 if !portrait { VStack(alignment: .leading, spacing: 3) {
                     Text(scene.title)
-                        .font(PulseFont.display(15, relativeTo: .subheadline, weight: .semibold))
+                        .font(.system(.subheadline, weight: .semibold))
                         .foregroundStyle(Theme.text)
                         .lineLimit(2, reservesSpace: false)
                     Text(subtitle)
@@ -50,7 +50,7 @@ struct SceneCard: View {
             .overlay(alignment: .bottomLeading) {
                 if portrait {
                     Text(scene.title)
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(.caption, design: .serif, weight: .bold))
                         .foregroundStyle(.white)
                         .lineLimit(2)
                         .padding(.horizontal, 8).padding(.bottom, 8)
@@ -64,9 +64,9 @@ struct SceneCard: View {
             }
             .overlay(alignment: .topLeading) {
                 if let label = scene.resolutionLabel, label == "4K" || label == "1440p" {
-                    Text(label).font(.system(size: 9, weight: .heavy)).foregroundStyle(.white)
-                        .padding(.horizontal, 5).padding(.vertical, 2)
-                        .background(Theme.accent, in: RoundedRectangle(cornerRadius: 3, style: .continuous)).padding(6)
+                    Text(label).font(.system(.caption2, design: .monospaced, weight: .bold)).foregroundStyle(Theme.onAccent)
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(Theme.accent, in: Capsule()).padding(6)
                 }
             }
             .overlay(alignment: .topTrailing) {
@@ -81,7 +81,7 @@ struct SceneCard: View {
             .overlay(alignment: .bottomTrailing) {
                 if !portrait, let runtime = Format.runtime(scene.duration) {
                     Text(runtime)
-                        .font(.caption2.weight(.semibold).monospacedDigit())
+                        .font(PulseFont.timecode(.caption2))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 8).padding(.vertical, 3)
                         .background(.black.opacity(0.55), in: Capsule())
@@ -161,7 +161,7 @@ struct SceneRow: View {
                     .overlay { PulseArt(scene.poster ?? scene.thumb, seed: scene.id) }
                     .clipShape(.rect(cornerRadius: Theme.Radius.card, style: .continuous))
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(scene.title).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
+                    Text(scene.title).font(.system(.subheadline, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
                     Text([scene.studio?.name, Format.runtime(scene.duration)].compactMap { $0 }.joined(separator: " · "))
                         .font(.caption).foregroundStyle(Theme.textSecondary).lineLimit(1)
                     if let p = scene.progress, !p.completed, p.fraction > 0 {

@@ -49,23 +49,26 @@ struct HeroCarousel: View {
         }
     }
 
+    /// Film-strip pager: one tick per feature, the live one is taller and fills like a frame counter.
     @ViewBuilder
     private var pager: some View {
         if videos.count > 1 {
-            HStack(spacing: 6) {
+            HStack(alignment: .bottom, spacing: 5) {
                 ForEach(videos.indices, id: \.self) { i in
                     Capsule()
                         .fill(Color.white.opacity(0.28))
-                        .frame(width: i == index ? 24 : 5, height: 4)
-                        .overlay(alignment: .leading) {
+                        .frame(width: 3, height: i == index ? 22 : 11)
+                        .overlay(alignment: .bottom) {
                             if i == index {
-                                Capsule().fill(Color.white).scaleEffect(x: max(progress, 0.001), anchor: .leading)
+                                Capsule().fill(Theme.accent).scaleEffect(y: max(progress, 0.001), anchor: .bottom)
                             }
                         }
                 }
             }
             .animation(Theme.glide, value: index)
-            .padding(.bottom, 8)
+            .padding(.trailing, Theme.Space.page)
+            .padding(.bottom, 22)
+            .frame(maxWidth: .infinity, alignment: .trailing)
             .accessibilityHidden(true)
         }
     }
@@ -76,42 +79,50 @@ private struct HeroSlide: View {
     let height: CGFloat
     @Environment(PlayerCoordinator.self) private var player
     @Environment(FavoritesHub.self) private var hub
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared = false
     @State private var drift = false
 
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack(alignment: .bottomLeading) {
             art
-            LinearGradient(stops: [.init(color: .clear, location: 0), .init(color: .black.opacity(0.55), location: 0.55), .init(color: .black, location: 1)], startPoint: .top, endPoint: .bottom).frame(height: height * 0.62).frame(maxHeight: .infinity, alignment: .bottom).allowsHitTesting(false)
-            LinearGradient(colors: [.black.opacity(0.5), .clear], startPoint: .top, endPoint: .bottom)
+            LinearGradient(stops: [.init(color: .clear, location: 0), .init(color: .black.opacity(0.6), location: 0.5), .init(color: .black, location: 1)],
+                           startPoint: .top, endPoint: .bottom)
+                .frame(height: height * 0.7).frame(maxHeight: .infinity, alignment: .bottom).allowsHitTesting(false)
+            LinearGradient(colors: [.black.opacity(0.55), .clear], startPoint: .top, endPoint: .bottom)
                 .frame(height: 140).frame(maxHeight: .infinity, alignment: .top).allowsHitTesting(false)
-            VStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 10) {
+                if let meta = timecodeLine {
+                    Text(meta)
+                        .font(PulseFont.timecode(.caption))
+                        .foregroundStyle(Theme.accentSoft)
+                        .lineLimit(1)
+                }
                 Text(video.title)
-                    .font(.system(size: 34, weight: .heavy))
-                    .tracking(-0.5)
+                    .font(.system(.largeTitle, design: .serif, weight: .bold))
                     .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.8)
+                    .lineLimit(3)
+                    .minimumScaleFactor(0.7)
+                    .fixedSize(horizontal: false, vertical: true)
                     .shadow(color: .black.opacity(0.5), radius: 12, y: 2)
-                    .blur(radius: appeared ? 0 : 12)
-                    .scaleEffect(appeared ? 1 : 1.08)
-                if !metaLine.isEmpty {
-                    Text(metaLine).font(.system(size: 13, weight: .semibold)).foregroundStyle(.white.opacity(0.85)).lineLimit(1)
+                if !castLine.isEmpty {
+                    Text(castLine).font(.subheadline.weight(.medium)).foregroundStyle(.white.opacity(0.85)).lineLimit(1)
                 }
                 actions.padding(.top, 6)
-                Color.clear.frame(height: 22)
+                Color.clear.frame(height: 26)
             }
             .padding(.horizontal, Theme.Space.page)
-            .frame(maxWidth: .infinity)
-            .offset(y: appeared ? 0 : 24)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .offset(y: appeared ? 0 : 18)
             .opacity(appeared ? 1 : 0)
         }
         .frame(height: height)
         .clipped()
         .onAppear {
-            withAnimation(.smooth(duration: 0.9).delay(0.1)) { appeared = true }
-            withAnimation(.easeInOut(duration: 18).repeatForever(autoreverses: true)) { drift = true }
+            let enter: Animation? = reduceMotion ? nil : Animation.smooth(duration: 0.8).delay(0.08)
+            withAnimation(enter) { appeared = true }
+            guard !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: 20).repeatForever(autoreverses: true)) { drift = true }
         }
     }
 
@@ -121,46 +132,38 @@ private struct HeroSlide: View {
             .visualEffect { content, proxy in
                 content.offset(x: -proxy.frame(in: .scrollView(axis: .horizontal)).minX * 0.25)
             }
-            .scaleEffect(drift ? 1.22 : 1.08)
+            .scaleEffect(drift ? 1.2 : 1.08)
     }
 
-    /// My List / Play / Info, the classic three-up row.
+    /// Play leads. Add to list and info are glass circles that share one container so they blend as they press.
     private var actions: some View {
         let saved = hub.isFavorite(video)
-        return HStack(spacing: 0) {
-            Button { Task { await hub.toggle(video) } } label: {
-                VStack(spacing: 4) {
-                    Image(systemName: saved ? "checkmark" : "plus").font(.system(size: 22, weight: .semibold))
-                        .contentTransition(.symbolEffect(.replace))
-                    Text("My List").font(.system(size: 11, weight: .semibold))
+        return PulseGlassGroup(spacing: 10) {
+            HStack(spacing: 10) {
+                Button { player.play(video) } label: {
+                    Label(video.isInProgress ? "Resume" : "Play", systemImage: "play.fill")
+                        .lineLimit(1)
                 }
-                .foregroundStyle(.white)
-                .frame(width: 72)
-            }
-            .buttonStyle(.pressable)
-            .accessibilityLabel(saved ? "Remove from My List" : "Add to My List")
-            Spacer(minLength: 12)
-            Button { player.play(video) } label: {
-                Label(video.isInProgress ? "Resume" : "Play", systemImage: "play.fill")
-                    .frame(minWidth: 96)
-            }
-            .buttonStyle(.pulsePrimary)
-            Spacer(minLength: 12)
-            NavigationLink(value: Route.scene(video)) {
-                VStack(spacing: 4) {
-                    Image(systemName: "info.circle").font(.system(size: 22, weight: .regular))
-                    Text("Info").font(.system(size: 11, weight: .semibold))
+                .buttonStyle(.pulsePrimary)
+                Button { Task { await hub.toggle(video) } } label: {
+                    Image(systemName: saved ? "checkmark" : "plus").contentTransition(.symbolEffect(.replace))
                 }
-                .foregroundStyle(.white)
-                .frame(width: 72)
+                .buttonStyle(.pulseIcon(isOn: saved))
+                .accessibilityLabel(saved ? "Remove from My List" : "Add to My List")
+                NavigationLink(value: Route.scene(video)) { Image(systemName: "info") }
+                    .buttonStyle(.pulseIcon)
+                    .accessibilityLabel("Details")
             }
-            .buttonStyle(.pressable)
         }
-        .frame(maxWidth: 340)
         .sensoryFeedback(.success, trigger: saved)
     }
 
-    private var metaLine: String {
+    private var timecodeLine: String? {
+        let parts = [video.year.map(String.init), Format.runtime(video.duration), video.resolutionLabel].compactMap { $0 }
+        return parts.isEmpty ? nil : parts.joined(separator: "  /  ")
+    }
+
+    private var castLine: String {
         ([video.studio?.name] + video.performers.prefix(2).map(\.name)).compactMap { $0 }.joined(separator: " · ")
     }
 }

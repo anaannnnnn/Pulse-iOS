@@ -1,7 +1,7 @@
 #if canImport(SwiftUI) && canImport(UIKit)
 import SwiftUI
 
-/// Main action: solid crimson, small radius.
+/// Main action: solid accent capsule with dark ink on warm accents.
 public struct PulsePrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
@@ -10,11 +10,12 @@ public struct PulsePrimaryButtonStyle: ButtonStyle {
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(.headline, weight: .bold))
-            .foregroundStyle(.white)
+            .foregroundStyle(Theme.onAccent)
             .padding(.horizontal, 22)
-            .frame(minHeight: 46)
-            .background(Theme.accent, in: RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous))
-            .overlay { ShineSweep().clipShape(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)) }
+            .frame(minHeight: 50)
+            .background(Theme.accent, in: Capsule())
+            .overlay(Capsule().strokeBorder(.white.opacity(0.28), lineWidth: 0.8))
+            .shadow(color: Theme.accent.opacity(0.35), radius: 14, y: 6)
             .opacity(isEnabled ? 1 : 0.45)
             .brightness(configuration.isPressed ? -0.12 : 0)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
@@ -23,7 +24,7 @@ public struct PulsePrimaryButtonStyle: ButtonStyle {
     }
 }
 
-/// Secondary action: translucent grey slab with a thin white rim.
+/// Secondary action: Liquid Glass capsule (frosted material before iOS 26).
 public struct PulseGlassButtonStyle: ButtonStyle {
     var tint: Color?
 
@@ -34,16 +35,15 @@ public struct PulseGlassButtonStyle: ButtonStyle {
             .font(.system(.subheadline, weight: .semibold))
             .foregroundStyle(Theme.text)
             .padding(.horizontal, 20)
-            .frame(minHeight: 46)
-            .background((tint ?? Color(white: 0.45)).opacity(tint == nil ? 0.38 : 0.3), in: RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous).strokeBorder(.white.opacity(0.35), lineWidth: 1))
+            .frame(minHeight: 48)
+            .pulseCapsuleGlass(tint: tint, interactive: true)
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
             .animation(Theme.tap, value: configuration.isPressed)
             .sensoryFeedback(.selection, trigger: configuration.isPressed) { _, pressed in pressed }
     }
 }
 
-/// Round dark button with a thin rim. `isOn` colours the rim and symbol.
+/// Round glass button. `isOn` tints the glass and symbol.
 public struct PulseIconButtonStyle: ButtonStyle {
     var tint: Color?
     var isOn: Bool
@@ -56,8 +56,7 @@ public struct PulseIconButtonStyle: ButtonStyle {
             .font(.system(size: 17, weight: .semibold))
             .foregroundStyle(isOn ? color : Theme.text)
             .frame(width: 44, height: 44)
-            .background(.black.opacity(0.45), in: Circle())
-            .overlay(Circle().strokeBorder(isOn ? color.opacity(0.9) : .white.opacity(0.55), lineWidth: 1.2))
+            .pulseGlass(in: Circle(), tint: isOn ? color.opacity(0.25) : nil, interactive: true)
             .scaleEffect(configuration.isPressed ? 0.9 : 1)
             .animation(Theme.tap, value: configuration.isPressed)
             .animation(Theme.tap, value: isOn)

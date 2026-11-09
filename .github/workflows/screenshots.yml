@@ -29,35 +29,47 @@ jobs:
             -destination 'generic/platform=iOS Simulator' -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO | tail -15
 
-      - name: Boot simulator and capture
+      - name: Capture on several devices
         run: |
-          set -euo pipefail
-          UDID=$(xcrun simctl list devices available -j | python3 -c "
-          import json,sys
-          d=json.load(sys.stdin)['devices']
-          c=[x for k,v in d.items() if 'iOS' in k for x in v if 'iPhone' in x['name'] and 'Pro' in x['name'] and 'Max' not in x['name']]
-          print(c[-1]['udid'])")
-          xcrun simctl boot "$UDID"; xcrun simctl bootstatus "$UDID" -b
-          xcrun simctl ui "$UDID" appearance dark || true
+          set -uo pipefail
           APP=$(find build/Build/Products -name Pulse.app -maxdepth 3 | head -1)
-          xcrun simctl install "$UDID" "$APP"
           mkdir -p shots
-          shot() { # name, extra args...
-            local n=$1; shift
-            xcrun simctl terminate "$UDID" app.pulse.ios 2>/dev/null || true
-            xcrun simctl launch "$UDID" app.pulse.ios "$@"
-            sleep 7
-            xcrun simctl io "$UDID" screenshot "shots/$n.png"
+          pick() { # python regex on device name
+            xcrun simctl list devices available -j | python3 -c "
+          import json,sys,re
+          d=json.load(sys.stdin)['devices']
+          c=[x for k,v in d.items() if 'iOS' in k for x in v if re.search(sys.argv[1], x['name'])]
+          print(c[-1]['udid'] if c else '')" "$1"
           }
-          shot signin
-          shot home -pulseDemo -pulseTab home
-          sleep 0; xcrun simctl io "$UDID" screenshot shots/home-b.png
-          shot library -pulseDemo -pulseTab library
-          shot people -pulseDemo -pulseTab people
-          shot saved -pulseDemo -pulseTab saved
-          shot search -pulseDemo -pulseTab search
-          shot settings -pulseDemo -pulseSettings
-          shot tonight -pulseDemo -pulseTonight
+          run_device() { # tag, regex, text size
+            local tag=$1 rx=$2 size=$3
+            local UDID; UDID=$(pick "$rx")
+            if [ -z "$UDID" ]; then echo "no device for $tag"; return; fi
+            xcrun simctl boot "$UDID"; xcrun simctl bootstatus "$UDID" -b
+            xcrun simctl ui "$UDID" appearance dark || true
+            xcrun simctl ui "$UDID" content_size "$size" || true
+            xcrun simctl install "$UDID" "$APP"
+            shot() {
+              local n=$1; shift
+              xcrun simctl terminate "$UDID" app.pulse.ios 2>/dev/null || true
+              xcrun simctl launch "$UDID" app.pulse.ios "$@"
+              sleep 6
+              xcrun simctl io "$UDID" screenshot "shots/$tag-$n.png"
+            }
+            shot signin
+            shot home -pulseDemo -pulseTab home
+            shot library -pulseDemo -pulseTab library
+            shot people -pulseDemo -pulseTab people
+            shot saved -pulseDemo -pulseTab saved
+            shot search -pulseDemo -pulseTab search
+            shot settings -pulseDemo -pulseSettings
+            shot tonight -pulseDemo -pulseTonight
+            xcrun simctl shutdown "$UDID" || true
+          }
+          run_device pro 'iPhone 1[0-9] Pro$' large
+          run_device se 'iPhone SE' extra-large
+          run_device max 'iPhone 1[0-9] Pro Max' accessibility-large
+          run_device ipad 'iPad (Pro|Air)' large
           ls -l shots
 
       - uses: actions/upload-artifact@v4

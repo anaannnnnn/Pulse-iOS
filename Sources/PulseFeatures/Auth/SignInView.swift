@@ -25,10 +25,10 @@ struct SignInView: View {
         ScrollView {
             VStack(spacing: 26) {
                 Spacer(minLength: 72)
-                PulseMark(size: 40)
+                PulseMark(size: 30)
                     .scaleEffect(appeared ? 1 : 0.7).opacity(appeared ? 1 : 0)
                 VStack(spacing: 8) {
-                    Text("Welcome back").font(PulseFont.display(34, relativeTo: .largeTitle, weight: .heavy)).tracking(-0.6).foregroundStyle(Theme.text)
+                    Text("Welcome back").font(.system(.largeTitle, design: .serif, weight: .bold)).multilineTextAlignment(.center).foregroundStyle(Theme.text)
                     Text(session.isDemo ? "Demo library" : "Use the same account as your Pulse server.")
                         .font(.subheadline).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
                 }
@@ -79,8 +79,8 @@ struct SignInView: View {
                     }
                 }
                 .padding(18)
-                .pulseGlass(in: RoundedRectangle(cornerRadius: 32, style: .continuous))
-                .pulseGlowBorder(RoundedRectangle(cornerRadius: 32, style: .continuous))
+                .background(Theme.surface.opacity(0.88), in: RoundedRectangle(cornerRadius: Theme.Radius.sheet, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sheet, style: .continuous).strokeBorder(Theme.lineStrong, lineWidth: 1))
                 .frame(maxWidth: 420)
                 .offset(y: appeared ? 0 : 40).opacity(appeared ? 1 : 0)
 
@@ -112,7 +112,7 @@ struct SignInView: View {
             content()
         }
         .padding(.horizontal, 16).frame(minHeight: 54)
-        .pulseGlass(in: RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous))
+        .background(Theme.raised, in: RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous))
     }
 
     private var advanced: some View {

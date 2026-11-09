@@ -29,18 +29,16 @@ struct TonightSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    Text("How long do you have?").font(PulseFont.title(.title3)).foregroundStyle(Theme.text)
-                    ScrollView(.horizontal) {
-                        HStack(spacing: 10) {
-                            ForEach(Length.allCases) { option in
-                                Button(LocalizedStringKey(option.rawValue)) { length = option }
-                                    .buttonStyle(.pulseGlass(tint: length == option ? Theme.accent.opacity(0.4) : nil))
-                                    .accessibilityAddTraits(length == option ? .isSelected : [])
+                    Text("How long do you have?").font(PulseFont.headline(.title2)).foregroundStyle(Theme.text)
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 130), spacing: 10)], spacing: 10) {
+                        ForEach(Length.allCases) { option in
+                            Button { withAnimation(Theme.tap) { length = option } } label: {
+                                Text(LocalizedStringKey(option.rawValue)).lineLimit(1).minimumScaleFactor(0.8).frame(maxWidth: .infinity)
                             }
+                            .buttonStyle(.pulseGlass(tint: length == option ? Theme.accent.opacity(0.45) : nil))
+                            .accessibilityAddTraits(length == option ? .isSelected : [])
                         }
                     }
-                    .scrollIndicators(.hidden)
-                    .scrollClipDisabled()
 
                     if loading {
                         ProgressView().frame(maxWidth: .infinity).padding(.top, 40)
@@ -87,7 +85,7 @@ private struct TonightRow: View {
         HStack(spacing: 14) {
             PulseArt(video.poster ?? video.thumb, seed: video.id)
                 .frame(width: 128, height: 80)
-                .clipShape(.rect(cornerRadius: 14, style: .continuous))
+                .clipShape(.rect(cornerRadius: Theme.Radius.card, style: .continuous))
                 .overlay { Image(systemName: "play.fill").foregroundStyle(.white).frame(width: 36, height: 36).pulseGlass(in: Circle()) }
             VStack(alignment: .leading, spacing: 4) {
                 Text(video.title).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text).lineLimit(2)
@@ -97,7 +95,7 @@ private struct TonightRow: View {
             Spacer(minLength: 0)
         }
         .padding(10)
-        .pulseGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.panel, style: .continuous))
         .accessibilityElement(children: .combine)
         .accessibilityHint("Plays now")
     }

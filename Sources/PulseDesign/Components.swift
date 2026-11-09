@@ -66,7 +66,7 @@ public struct Chip: View {
         .foregroundStyle(tint ?? Theme.text)
         .padding(.horizontal, 10)
         .frame(minHeight: 26)
-        .background(Color.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
+        .background(Color.white.opacity(0.12), in: Capsule())
     }
 }
 
@@ -115,8 +115,7 @@ public struct PulseSegmented<Value: Hashable>: View {
                     .frame(maxWidth: .infinity, minHeight: 40)
                     .background {
                         if selected {
-                            Capsule().fill(.white.opacity(0.16))
-                                .overlay(Capsule().strokeBorder(.white.opacity(0.22), lineWidth: 0.8))
+                            Capsule().fill(.white.opacity(0.18))
                                 .matchedGeometryEffect(id: "pill", in: pill)
                         }
                     }
@@ -149,7 +148,7 @@ public struct SectionHeader: View {
         HStack(alignment: .center, spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 8) {
-                    Text(title).font(.system(size: 19, weight: .bold)).foregroundStyle(Theme.text)
+                    Text(title).font(PulseFont.headline(.title3, weight: .semibold)).foregroundStyle(Theme.text)
                     if let count { CountBadge(count) }
                 }
                 if let subtitle { Text(subtitle).font(.footnote).foregroundStyle(Theme.textSecondary) }
@@ -159,7 +158,7 @@ public struct SectionHeader: View {
             if let action {
                 Button(action: action) {
                     HStack(spacing: 2) {
-                        Text("See all").font(.system(size: 13, weight: .semibold))
+                        Text("See all").font(.footnote.weight(.semibold))
                         Image(systemName: "chevron.right").font(.system(size: 11, weight: .bold))
                     }
                     .foregroundStyle(Theme.textSecondary)
@@ -194,7 +193,7 @@ public struct EmptyStateView: View {
                 .padding(22)
                 .pulseGlass(in: Circle(), tint: Theme.accent.opacity(0.15))
                 .symbolEffect(.pulse)
-            Text(title).font(.system(size: 19, weight: .bold)).foregroundStyle(Theme.text)
+            Text(title).font(PulseFont.headline(.title3)).foregroundStyle(Theme.text)
             Text(message).font(.subheadline).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
             if let actionTitle, let action {
                 Button(actionTitle, action: action).buttonStyle(.pulsePrimary).padding(.top, 6)
